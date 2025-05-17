@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -13,16 +13,24 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
-    return { message: 'This is the user you gave me...', user: createUserDto };
+  async create(createUserDto: CreateUserDto) {
+    try {
+      const user = this.usersRepository.create(createUserDto); // esta línea sólo crea la instancia del usuario, todavía no la grabó en base de datos
+      await this.usersRepository.save(user);
+
+      return user;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('Algo terrible ocurrió en el servidor.');
+    }
   }
 
   findAll(): Promise<User[]> {
     return this.usersRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  findOne(id: number): Promise<User> {
+    return this.usersRepository.findOneBy({ user_id: id });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
