@@ -15,6 +15,8 @@ import { User } from '../entities/user.entity';
 
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 
+import { validate as isUuid } from 'uuid';
+
 @Injectable()
 export class UsersService {
   private paginationLimit: number;
@@ -52,10 +54,25 @@ export class UsersService {
     return users;
   }
 
-  async findOne(id: string): Promise<User> {
-    const user = await this.usersRepository.findOneBy({ user_id: id });
+  async findOne(term: string): Promise<User> {
+    let user: User;
 
-    if (!user) throw new NotFoundException('No hay ningún usuario con este id.');
+    if (isUuid(term)) {
+      user = await this.usersRepository.findOneBy({ user_id: term });
+    } else {
+      const query = this.usersRepository.createQueryBuilder();
+      /* Esto está super guay! Es un Where clásico de MySQL sin tener que escribir ninguna claúsula, y TypeORM lo hace super flexible! */
+      console.log(term);
+
+      user = await query
+        .where('nickname LIKE :nickname OR email LIKE :email', {
+          nickname: `%${term}%`,
+          email: `%${term}%`,
+        })
+        .getOne();
+    }
+
+    if (!user) throw new NotFoundException('No hay ningún usuario que aplique a tu búsqueda.');
 
     return user;
   }
