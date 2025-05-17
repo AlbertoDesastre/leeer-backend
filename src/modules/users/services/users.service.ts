@@ -62,9 +62,13 @@ export class UsersService {
     if (!user)
       // BadRequestException me lo trae de serie Nest
       throw new BadRequestException(`El usuario con id ${id} no existe y no se actualizó.`);
-    await this.usersRepository.save(user);
 
-    return user;
+    try {
+      await this.usersRepository.save(user);
+      return user;
+    } catch (error) {
+      this.handleException(error);
+    }
   }
 
   async remove(id: string) {
@@ -79,8 +83,10 @@ export class UsersService {
   }
 
   handleException(error) {
+    this.logger.error(error); // en cualquier tipo de error me interesa el logeo.
+
     if (error.code === 'ER_DUP_ENTRY') {
-      this.logger.error(error);
+      throw new BadRequestException(error.sqlMessage);
     }
 
     throw new InternalServerErrorException('Algo terrible ocurrió en el servidor.');
