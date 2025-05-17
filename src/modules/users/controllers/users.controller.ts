@@ -8,6 +8,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  // Cuando usas "@Body" le pasas un DTO, que es lo que comprueba que el dato que le llega cumple con el "contrato" establecido por el DTO
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
@@ -19,7 +20,7 @@ export class UsersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOne(+id); // Los símbolos de "+" al lado de "id" transforman un número que esté en formato string a un número de verdad
   }
 
   @Patch(':id')
