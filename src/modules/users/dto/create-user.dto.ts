@@ -6,7 +6,6 @@ const ERROR_MESSAGE = {
 };
 
 export class CreateUserDto {
-  readonly user_id: number;
   @IsEmail()
   readonly email: string;
   @IsString()
