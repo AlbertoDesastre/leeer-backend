@@ -5,13 +5,21 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
+  private paginationLimit: number;
+
   constructor(
+    private readonly configService: ConfigService,
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
-  ) {}
+    private readonly usersRepository: Repository<User>,
+  ) {
+    this.paginationLimit = this.configService.get<number>('paginationLimit');
+    /* Esto es un ejemplo de uso para cuando tenga que paginar partes/creaciones 
+     console.log('hola!', this.paginationLimit); */
+  }
 
   async create(createUserDto: CreateUserDto) {
     try {
