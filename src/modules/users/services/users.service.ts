@@ -13,6 +13,8 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
 
+import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
+
 @Injectable()
 export class UsersService {
   private paginationLimit: number;
@@ -25,8 +27,6 @@ export class UsersService {
   ) {
     this.logger = new Logger();
     this.paginationLimit = this.configService.get<number>('paginationLimit');
-    /* Esto es un ejemplo de uso para cuando tenga que paginar partes/creaciones 
-     console.log('hola!', this.paginationLimit); */
   }
 
   async create(createUserDto: CreateUserDto) {
@@ -40,8 +40,12 @@ export class UsersService {
     }
   }
 
-  findAll(): Promise<User[]> {
-    const users = this.usersRepository.find();
+  findAll(paginationDto: PaginationDto): Promise<User[]> {
+    const { limit = this.paginationLimit, offset = 0 } = paginationDto;
+
+    console.log(limit, offset);
+
+    const users = this.usersRepository.find({ take: limit, skip: offset }); // take = toma el número de datos solicitado por paginationLimit | skip: se salta el número de resultados solicitados por offset
 
     if (!users) throw new NotFoundException('No se han encontrado usuarios.');
 

@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
+import { EnvConfiguration } from './modules/config/env.config';
 
 import { UsersModule } from '@/modules/users/users.module';
 import { User } from './modules/users/entities/user.entity';
-import { EnvConfiguration } from './modules/config/env.config';
+
+import { CommonModule } from './modules/common/common.module';
 
 @Module({
   imports: [
@@ -21,6 +23,7 @@ import { EnvConfiguration } from './modules/config/env.config';
     }),
     // features de la aplicación
     UsersModule,
+    CommonModule,
   ],
   controllers: [],
   providers: [],

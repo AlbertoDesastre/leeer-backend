@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 
 import { UsersService } from '@/modules/users/services/users.service';
 import { CreateUserDto } from '@/modules/users/dto/create-user.dto';
 import { UpdateUserDto } from '@/modules/users/dto/update-user.dto';
+
+import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 
 @Controller('users')
 export class UsersController {
@@ -15,8 +17,9 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  // @Query -> es la consulta de la URL. Por ejemplo: miweb?consulta1=blanco&consulta2=8
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.usersService.findAll(paginationDto);
   }
 
   @Get(':id')
