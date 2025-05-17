@@ -1,51 +1,79 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
   private paginationLimit: number;
-
+  private logger: Logger;
   constructor(
     private readonly configService: ConfigService,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
   ) {
+    this.logger = new Logger();
     this.paginationLimit = this.configService.get<number>('paginationLimit');
     /* Esto es un ejemplo de uso para cuando tenga que paginar partes/creaciones 
      console.log('hola!', this.paginationLimit); */
   }
 
   async create(createUserDto: CreateUserDto) {
-    try {
-      const user = this.usersRepository.create(createUserDto); // esta línea sólo crea la instancia del usuario, todavía no la grabó en base de datos
-      await this.usersRepository.save(user);
+    const user = this.usersRepository.create(createUserDto); // esta línea sólo crea la instancia del usuario, todavía no la grabó en base de datos
 
+    try {
+      await this.usersRepository.save(user);
       return user;
     } catch (error) {
-      console.log(error);
+      this.handleException(error);
       throw new InternalServerErrorException('Algo terrible ocurrió en el servidor.');
     }
   }
 
   findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+    const users = this.usersRepository.find();
+
+    if (!users) throw new NotFoundException('No se han encontrado usuarios.');
+
+    return users;
   }
 
-  findOne(id: number): Promise<User> {
-    return this.usersRepository.findOneBy({ user_id: id });
+  findOne(id: string): Promise<User> {
+    const user = this.usersRepository.findOneBy({ user_id: id });
+
+    if (!user) throw new NotFoundException('No hay ningún usuario con este id.');
+
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.usersRepository.preload({ user_id: id, ...updateUserDto }); // Precarga una entidad de la base de datos en base a su llave primaria. Si no encontró nada entonces la instancia creada estará vacía.
+
+    if (!user)
+      // BadRequestException me lo trae de serie Nest
+      throw new BadRequestException(`El usuario con id ${id} no existe y no se actualizó.`);
+    await this.usersRepository.save(user);
+
+    return user;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} user`;
+  }
+
+  handleException(error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      this.logger.error(error);
+    }
   }
 }
