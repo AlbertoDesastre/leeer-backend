@@ -17,6 +17,7 @@ import { User } from '../entities/user.entity';
 export class UsersService {
   private paginationLimit: number;
   private logger: Logger;
+
   constructor(
     private readonly configService: ConfigService,
     @InjectRepository(User)
@@ -36,7 +37,6 @@ export class UsersService {
       return user;
     } catch (error) {
       this.handleException(error);
-      throw new InternalServerErrorException('Algo terrible ocurrió en el servidor.');
     }
   }
 
@@ -48,8 +48,8 @@ export class UsersService {
     return users;
   }
 
-  findOne(id: string): Promise<User> {
-    const user = this.usersRepository.findOneBy({ user_id: id });
+  async findOne(id: string): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ user_id: id });
 
     if (!user) throw new NotFoundException('No hay ningún usuario con este id.');
 
@@ -67,13 +67,22 @@ export class UsersService {
     return user;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    await this.findOne(id); // si no encuentra el usuario este método ya tira Exception
+
+    try {
+      await this.usersRepository.delete({ user_id: id }); // esta operación ni siquiera checkea si existe el usuario en DB así que hay que hacer una comprobación manual
+      return `El usuario con id ${id} fue eliminado.`;
+    } catch (error) {
+      this.handleException(error);
+    }
   }
 
   handleException(error) {
     if (error.code === 'ER_DUP_ENTRY') {
       this.logger.error(error);
     }
+
+    throw new InternalServerErrorException('Algo terrible ocurrió en el servidor.');
   }
 }
