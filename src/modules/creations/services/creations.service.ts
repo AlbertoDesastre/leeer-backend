@@ -77,11 +77,12 @@ export class CreationsService {
     if (isUuid(term)) {
       creation = await this.creationsRepository.findOneBy({ creation_id: term, is_draft: false });
     } else {
-      const query = this.creationsRepository.createQueryBuilder();
+      const query = this.creationsRepository.createQueryBuilder('creac');
       /* Esto está super guay! Es un Where clásico de MySQL sin tener que escribir ninguna claúsula, y TypeORM lo hace super flexible! */
       // console.log(term);
       creation = await query
         .where('title LIKE :title AND is_draft = false', { title: `%${term}%` })
+        .leftJoinAndSelect('creac.user', 'creacUsers') // en el primer parámetro hay que buscar por el nombre de la entidad "user" de mi entidad "Creation", no por el nombre de la tabla "users"
         .getOne();
     }
 
@@ -94,6 +95,7 @@ export class CreationsService {
   async update(id: string, updateCreationDto: UpdateCreationDto) {
     const creation = await this.creationsRepository.preload({
       creation_id: id,
+      is_draft: updateCreationDto.isDraft,
       ...updateCreationDto,
     }); // Precarga una entidad de la base de datos en base a su llave primaria. Si no encontró nada entonces la instancia creada estará vacía.
 
