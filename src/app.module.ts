@@ -18,8 +18,8 @@ import { CommonModule } from './modules/common/common.module';
       port: +process.env.DB_PORT,
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
-      entities: [User], // informo a TypeORM de esta entidad
       database: process.env.DB_NAME,
+      autoLoadEntities: true, // ahora que tengo autoload no hace falta que declare mis entidades en "entities", solo necesito usarlas en un módulo y se autodetectan solas.
     }),
     // features de la aplicación
     UsersModule,
