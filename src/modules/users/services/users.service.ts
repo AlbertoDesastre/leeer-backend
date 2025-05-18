@@ -35,6 +35,7 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto) {
+    /* Si trae creations se queda el array que viene, si no, se hace un array vacío */
     const { creations = [], ...userDto } = createUserDto;
 
     const user = this.usersRepository.create({

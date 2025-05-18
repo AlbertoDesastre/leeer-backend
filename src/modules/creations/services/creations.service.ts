@@ -15,6 +15,7 @@ import { UpdateCreationDto } from '@/modules/creations/dto/update-creation.dto';
 import { Creation } from '@/modules/creations/entities/creation.entity';
 
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
+import { User } from '@/modules/users/entities/user.entity';
 
 @Injectable()
 export class CreationsService {
@@ -25,13 +26,25 @@ export class CreationsService {
     private readonly configService: ConfigService,
     @InjectRepository(Creation)
     private readonly creationsRepository: Repository<Creation>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {
     this.logger = new Logger();
     this.paginationLimit = this.configService.get<number>('paginationLimit');
   }
 
   async create(createCreationDto: CreateCreationDto) {
-    const creation = this.creationsRepository.create(createCreationDto); // esta línea sólo crea la instancia de la creación, todavía no la grabó en base de datos
+    const { user_id, ...creationDto } = createCreationDto;
+
+    const user = await this.userRepository.findOneBy({ user_id });
+
+    if (!user) throw new NotFoundException(`El usuario con id ${user_id} no se encontró`);
+
+    const creation = this.creationsRepository.create({
+      user,
+      is_draft: creationDto.isDraft,
+      ...creationDto,
+    }); // esta línea sólo crea la instancia de la creación, todavía no la grabó en base de datos
 
     try {
       await this.creationsRepository.save(creation);
@@ -47,6 +60,10 @@ export class CreationsService {
       where: { is_draft: false }, // solo se mostrarán las creations públicas para los usuarios
       take: limit,
       skip: offset,
+      relations: {
+        // encontré el modo de regresar toda la data relacionada dios mío T.T
+        user: true,
+      },
     }); // take = toma el número de datos solicitado por paginationLimit | skip: se salta el número de resultados solicitados por offset
 
     if (!creations) throw new NotFoundException('No se han encontrado creaciones.');

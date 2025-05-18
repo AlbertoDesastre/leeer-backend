@@ -1,6 +1,8 @@
-import { IsBoolean, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
 
 export class CreateCreationDto {
+  @IsUUID()
+  readonly user_id: string;
   @IsString()
   @MinLength(3)
   readonly title: string;
