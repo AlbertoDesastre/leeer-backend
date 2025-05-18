@@ -1,4 +1,5 @@
-import { IsEmail, IsString, IsStrongPassword } from 'class-validator';
+import { Creation } from '@/modules/creations/entities/creation.entity';
+import { IsEmail, IsOptional, IsPort, IsString, IsStrongPassword } from 'class-validator';
 
 const ERROR_MESSAGE = {
   WEAK_PASSWORD:
@@ -22,4 +23,7 @@ export class CreateUserDto {
   )
   @IsString()
   readonly password: string;
+
+  @IsOptional()
+  creations?: Creation[];
 }

@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Creation } from '@/modules/creations/entities/creation.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 /* @Entity marca la tabla real de la BD "users" para hacer las transacciones. El resto de decoradores son autodefinitorios. */
 @Entity('users')
@@ -17,4 +18,12 @@ export class User {
   token: string;
   @Column()
   password: string;
+
+  // relación con las creaciones + breve explicación de la sintaxis
+  @OneToMany(
+    () => Creation, // primero le asigno la Entidad objetivo
+    (creation) => creation.user, // luego, dentro de esa entidad, por qué propiedad está conectada
+    { cascade: true }, // y finalmente delete on cascade: cuando se elimine este usuario elimina todas sus creaciones
+  )
+  creations?: Creation[];
 }

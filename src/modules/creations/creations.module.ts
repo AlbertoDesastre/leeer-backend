@@ -10,5 +10,6 @@ import { Creation } from './entities/creation.entity';
   imports: [ConfigModule, TypeOrmModule.forFeature([Creation])],
   controllers: [CreationsController],
   providers: [CreationsService],
+  exports: [],
 })
 export class CreationsModule {}

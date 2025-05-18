@@ -16,6 +16,7 @@ import { User } from '../entities/user.entity';
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 
 import { validate as isUuid } from 'uuid';
+import { Creation } from '@/modules/creations/entities/creation.entity';
 
 @Injectable()
 export class UsersService {
@@ -26,13 +27,20 @@ export class UsersService {
     private readonly configService: ConfigService,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Creation)
+    private readonly creationsRepository: Repository<Creation>,
   ) {
     this.logger = new Logger();
     this.paginationLimit = this.configService.get<number>('paginationLimit');
   }
 
   async create(createUserDto: CreateUserDto) {
-    const user = this.usersRepository.create(createUserDto); // esta línea sólo crea la instancia del usuario, todavía no la grabó en base de datos
+    const { creations = [], ...userDto } = createUserDto;
+
+    const user = this.usersRepository.create({
+      ...userDto,
+      creations: creations.map((creation) => this.creationsRepository.create(creation)),
+    }); // esta línea sólo crea la instancia del usuario, todavía no la grabó en base de datos
 
     try {
       await this.usersRepository.save(user);
