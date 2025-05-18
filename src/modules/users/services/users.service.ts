@@ -44,9 +44,7 @@ export class UsersService {
 
   findAll(paginationDto: PaginationDto): Promise<User[]> {
     const { limit = this.paginationLimit, offset = 0 } = paginationDto;
-
-    console.log(limit, offset);
-
+    // console.log(limit, offset);
     const users = this.usersRepository.find({ take: limit, skip: offset }); // take = toma el número de datos solicitado por paginationLimit | skip: se salta el número de resultados solicitados por offset
 
     if (!users) throw new NotFoundException('No se han encontrado usuarios.');
@@ -62,7 +60,6 @@ export class UsersService {
     } else {
       const query = this.usersRepository.createQueryBuilder();
       /* Esto está super guay! Es un Where clásico de MySQL sin tener que escribir ninguna claúsula, y TypeORM lo hace super flexible! */
-      console.log(term);
 
       user = await query
         .where('nickname LIKE :nickname OR email LIKE :email', {
