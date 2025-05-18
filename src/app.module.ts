@@ -7,6 +7,7 @@ import { UsersModule } from '@/modules/users/users.module';
 import { User } from './modules/users/entities/user.entity';
 
 import { CommonModule } from './modules/common/common.module';
+import { CreationsModule } from './modules/creations/creations.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { CommonModule } from './modules/common/common.module';
     // features de la aplicación
     UsersModule,
     CommonModule,
+    CreationsModule,
   ],
   controllers: [],
   providers: [],

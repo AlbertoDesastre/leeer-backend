@@ -16,6 +16,7 @@ import { User } from '../entities/user.entity';
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 
 import { validate as isUuid } from 'uuid';
+import { Creation } from '@/modules/creations/entities/creation.entity';
 
 @Injectable()
 export class UsersService {
@@ -26,13 +27,21 @@ export class UsersService {
     private readonly configService: ConfigService,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Creation)
+    private readonly creationsRepository: Repository<Creation>,
   ) {
     this.logger = new Logger();
     this.paginationLimit = this.configService.get<number>('paginationLimit');
   }
 
   async create(createUserDto: CreateUserDto) {
-    const user = this.usersRepository.create(createUserDto); // esta línea sólo crea la instancia del usuario, todavía no la grabó en base de datos
+    /* Si trae creations se queda el array que viene, si no, se hace un array vacío */
+    const { creations = [], ...userDto } = createUserDto;
+
+    const user = this.usersRepository.create({
+      ...userDto,
+      creations: creations.map((creation) => this.creationsRepository.create(creation)),
+    }); // esta línea sólo crea la instancia del usuario, todavía no la grabó en base de datos
 
     try {
       await this.usersRepository.save(user);
@@ -44,9 +53,7 @@ export class UsersService {
 
   findAll(paginationDto: PaginationDto): Promise<User[]> {
     const { limit = this.paginationLimit, offset = 0 } = paginationDto;
-
-    console.log(limit, offset);
-
+    // console.log(limit, offset);
     const users = this.usersRepository.find({ take: limit, skip: offset }); // take = toma el número de datos solicitado por paginationLimit | skip: se salta el número de resultados solicitados por offset
 
     if (!users) throw new NotFoundException('No se han encontrado usuarios.');
@@ -62,7 +69,6 @@ export class UsersService {
     } else {
       const query = this.usersRepository.createQueryBuilder();
       /* Esto está super guay! Es un Where clásico de MySQL sin tener que escribir ninguna claúsula, y TypeORM lo hace super flexible! */
-      console.log(term);
 
       user = await query
         .where('nickname LIKE :nickname OR email LIKE :email', {
