@@ -1,7 +1,8 @@
-import { Creation } from '@/modules/creations/entities/creation.entity';
-import { IsEmail, IsOptional, IsString, IsStrongPassword } from 'class-validator';
+import { IsString, IsEmail, IsStrongPassword, IsOptional } from 'class-validator';
 
-export class CreateUserDto {
+import { Creation } from '@/modules/creations/entities/creation.entity';
+
+export class RegisterAuthDto {
   @IsString()
   readonly nickname: string;
   @IsEmail()
@@ -10,8 +11,6 @@ export class CreateUserDto {
   readonly profile_picture: string;
   @IsString()
   readonly description: string;
-  @IsString()
-  readonly token: string;
   @IsStrongPassword(
     { minLength: 10, minUppercase: 1, minNumbers: 1, minSymbols: 1 },
     {
