@@ -1,7 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  ParseUUIDPipe,
+} from '@nestjs/common';
+
 import { UsersService } from '@/modules/users/services/users.service';
 import { CreateUserDto } from '@/modules/users/dto/create-user.dto';
 import { UpdateUserDto } from '@/modules/users/dto/update-user.dto';
+
+import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 
 @Controller('users')
 export class UsersController {
@@ -14,22 +27,23 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  // @Query -> es la consulta de la URL. Por ejemplo: miweb?consulta1=blanco&consulta2=8
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.usersService.findAll(paginationDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id); // Los símbolos de "+" al lado de "id" transforman un número que esté en formato string a un número de verdad
+  @Get(':term')
+  findOne(@Param('term') term: string) {
+    return this.usersService.findOne(term);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  remove(@Param('id', ParseUUIDPipe) id: string) {
+    return this.usersService.remove(id);
   }
 }
