@@ -43,7 +43,11 @@ export class CreationsService {
 
   findAll(paginationDto: PaginationDto): Promise<Creation[]> {
     const { limit = this.paginationLimit, offset = 0 } = paginationDto;
-    const creations = this.creationsRepository.find({ take: limit, skip: offset }); // take = toma el número de datos solicitado por paginationLimit | skip: se salta el número de resultados solicitados por offset
+    const creations = this.creationsRepository.find({
+      where: { is_draft: false }, // solo se mostrarán las creations públicas para los usuarios
+      take: limit,
+      skip: offset,
+    }); // take = toma el número de datos solicitado por paginationLimit | skip: se salta el número de resultados solicitados por offset
 
     if (!creations) throw new NotFoundException('No se han encontrado creaciones.');
 
@@ -54,12 +58,14 @@ export class CreationsService {
     let creation: Creation;
 
     if (isUuid(term)) {
-      creation = await this.creationsRepository.findOneBy({ creation_id: term });
+      creation = await this.creationsRepository.findOneBy({ creation_id: term, is_draft: false });
     } else {
       const query = this.creationsRepository.createQueryBuilder();
       /* Esto está super guay! Es un Where clásico de MySQL sin tener que escribir ninguna claúsula, y TypeORM lo hace super flexible! */
       // console.log(term);
-      creation = await query.where('title LIKE :title ', { title: `%${term}%` }).getOne();
+      creation = await query
+        .where('title LIKE :title AND is_draft = false', { title: `%${term}%` })
+        .getOne();
     }
 
     if (!creation)
