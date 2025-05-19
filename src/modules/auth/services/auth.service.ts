@@ -15,6 +15,8 @@ import { User } from '@/modules/users/entities/user.entity';
 
 import * as crypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
+import { JwtPayload } from '../interfaces/jwt-payload';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +24,7 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly jwtService: JwtService,
   ) {
     this.logger = new Logger();
   }
@@ -40,7 +43,7 @@ export class AuthService {
       delete user.password;
       delete user.user_id;
 
-      return user;
+      return { ...user, token: this.getToken({ email: user.email }) };
     } catch (error) {
       this.handleException(error);
     }
@@ -79,8 +82,12 @@ export class AuthService {
 
     delete user.password;
 
-    // eventualmente aquí se devolverá un token
-    return user;
+    return { ...user, token: this.getToken({ email: user.email }) };
+  }
+
+  getToken(payload: JwtPayload) {
+    const token = this.jwtService.sign(payload); // Ojo porque lo que recibe el método "sign" es un OBJETO, no el string de "email".
+    return token;
   }
 
   handleException(error) {
