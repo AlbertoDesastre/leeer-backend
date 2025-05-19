@@ -1,5 +1,5 @@
 import { User } from '@/modules/users/entities/user.entity';
-import { UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,6 +13,7 @@ import { JwtPayload } from '../interfaces/jwt-payload';
 3) si el token es válido
 
 Ahora, de aquí se pueden aumentar las validaciones con métodos custom por mí.*/
+@Injectable()
 export class JWTStrategy extends PassportStrategy(Strategy) {
   constructor(
     configService: ConfigService,
