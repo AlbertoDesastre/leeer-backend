@@ -5,6 +5,8 @@ import { RegisterAuthDto } from '@/modules/auth/dto/register-auth.dto';
 import { LoginAuthDto } from '@/modules/auth/dto/login-auth.dto';
 import { Auth } from '../entities/auth.entity';
 import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from '../decorators/get-user.decorator';
+import { User } from '@/modules/users/entities/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -23,8 +25,7 @@ export class AuthController {
   @Get('prueba')
   // Un Guard es una función que permite/previene el acceso a una ruta. Se ejecuta mucho antes que la ruta y el controlador. Fuente: https://docs.nestjs.com/guards
   @UseGuards(AuthGuard())
-  prueba(@Body() LoginAuthDto: LoginAuthDto) {
-    console.log('HOLAA', LoginAuthDto);
-    return this.authService.login(LoginAuthDto);
+  prueba(@GetUser() user: User) {
+    return user;
   }
 }
