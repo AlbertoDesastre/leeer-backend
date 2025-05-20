@@ -12,5 +12,5 @@ export const GetUser = createParamDecorator((data, context: ExecutionContext) =>
 
   if (!user) throw new InternalServerErrorException('El usuario no se encontró en la request.');
 
-  return user;
+  return data ? user[data] : user; // si me llega algún dato (argumento pasado al decorador) lo devuelvo. Si no, devuelvo el usuario entero
 });
