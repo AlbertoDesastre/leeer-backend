@@ -16,7 +16,7 @@ export class User {
   description: string;
   @Column()
   token: string;
-  @Column()
+  @Column({ select: false })
   password: string;
 
   // relación con las creaciones + breve explicación de la sintaxis
