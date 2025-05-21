@@ -9,6 +9,7 @@ import { RolesGuard } from '../guards/auth.guard';
 import { GetUser } from '../decorators/get-user.decorator';
 import { ProtectedByRoles } from '../decorators/decorators.decorator';
 import { VALID_ROLES } from '../interfaces/valid-roles';
+import { Authenticate } from '../decorators/authenticate.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -36,6 +37,12 @@ export class AuthController {
   @ProtectedByRoles(VALID_ROLES.ORIGINAL_AUTHOR) // Este Guard vacío signfica que dejo entrar a cualquiera (conceptualmente, un guest), y cada rol nuevo que le meta y no cumpla el tipo que me hace la request le salta un Forbiden access
   @UseGuards(AuthGuard(), RolesGuard)
   segundaPrueba(@GetUser() user: User, @GetUser('email') userEmail: string) {
+    return { token: user.token, user, userEmail };
+  }
+
+  @Get('tercera-prueba')
+  @Authenticate()
+  terceraPrueba(@GetUser() user: User, @GetUser('email') userEmail: string) {
     return { token: user.token, user, userEmail };
   }
 }
