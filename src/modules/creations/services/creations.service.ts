@@ -16,6 +16,8 @@ import { Creation } from '@/modules/creations/entities/creation.entity';
 
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 import { User } from '@/modules/users/entities/user.entity';
+import { CreationCollaboration } from '../entities/creation-collaboration.entity';
+import { CreateCollaborationPetitionDto } from '../dto/create-creation-collaboration-petition.dto';
 
 @Injectable()
 export class CreationsService {
@@ -28,6 +30,8 @@ export class CreationsService {
     private readonly creationsRepository: Repository<Creation>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(CreationCollaboration)
+    private readonly creationCollaborationRepository: Repository<CreationCollaboration>,
   ) {
     this.logger = new Logger();
     this.paginationLimit = this.configService.get<number>('paginationLimit');
@@ -73,9 +77,10 @@ export class CreationsService {
 
   async findOne(term: string): Promise<Creation> {
     let creation: Creation;
-
+    console.log(term);
     if (isUuid(term)) {
       creation = await this.creationsRepository.findOneBy({ creation_id: term, is_draft: false });
+      console.log(creation);
     } else {
       const query = this.creationsRepository.createQueryBuilder('creac');
       /* Esto está super guay! Es un Where clásico de MySQL sin tener que escribir ninguna claúsula, y TypeORM lo hace super flexible! */
@@ -117,6 +122,31 @@ export class CreationsService {
     try {
       await this.creationsRepository.delete({ creation_id: id }); // esta operación ni siquiera checkea si existe a creación en DB así que hay que hacer una comprobación manual
       return `La creación con id ${id} fue eliminado.`;
+    } catch (error) {
+      this.handleException(error);
+    }
+  }
+
+  // Colaboraciones
+
+  async sendCollaborationPetition(
+    user: User,
+    creation_id: string,
+    createCollaborationPetitionDto: CreateCollaborationPetitionDto,
+  ) {
+    const creation = await this.findOne(creation_id);
+
+    const creationCollab = this.creationCollaborationRepository.create({
+      user,
+      creation,
+      ...createCollaborationPetitionDto,
+    });
+
+    console.log(creationCollab);
+
+    try {
+      await this.creationsRepository.save(creation);
+      return creation;
     } catch (error) {
       this.handleException(error);
     }
