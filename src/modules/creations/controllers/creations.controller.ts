@@ -15,11 +15,38 @@ import { CreateCreationDto } from '@/modules/creations/dto/create-creation.dto';
 import { UpdateCreationDto } from '@/modules/creations/dto/update-creation.dto';
 
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
+import { Authenticate } from '@/modules/auth/decorators/authenticate.decorator';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
+import { User } from '@/modules/users/entities/user.entity';
+import { CreateCollaborationPetitionDto } from '../dto/create-creation-collaboration-petition.dto';
+import { AuthenticateByAuthorOwnership } from '@/modules/auth/decorators/authenticate-by-author-ownership.decorator';
 
 @Controller('creations')
 export class CreationsController {
   constructor(private readonly creationsService: CreationsService) {}
 
+  // Solicitudes de Colaboración
+  @Get('collaborations')
+  @AuthenticateByAuthorOwnership()
+  getCollaborationPetition(@Query('id', ParseUUIDPipe) creation_id: string) {
+    return this.creationsService.getCollaborationPetition(creation_id);
+  }
+
+  @Post('collaborations')
+  @Authenticate()
+  sendCollaborationPetition(
+    @GetUser() user: User,
+    @Query('id', ParseUUIDPipe) creation_id: string,
+    @Body() createCollaborationPetitionDto: CreateCollaborationPetitionDto,
+  ) {
+    return this.creationsService.sendCollaborationPetition(
+      user,
+      creation_id,
+      createCollaborationPetitionDto,
+    );
+  }
+
+  // Creations
   @Post()
   create(@Body() createCreationDto: CreateCreationDto) {
     return this.creationsService.create(createCreationDto);
@@ -28,11 +55,6 @@ export class CreationsController {
   @Get()
   findAll(@Query() paginationDto: PaginationDto) {
     return this.creationsService.findAll(paginationDto);
-  }
-
-  @Get(':term')
-  findOne(@Param('term') term: string) {
-    return this.creationsService.findOne(term);
   }
 
   @Patch(':id')
@@ -45,5 +67,9 @@ export class CreationsController {
     return this.creationsService.remove(id);
   }
 
+  @Get(':term') // ¡Esta ruta debe ir al final siempre, porque hace mathing dinámico con cualquier cosa! Las rutas específicas, en Nest, van siempre lo más arriba posible.
+  findOne(@Param('term') term: string) {
+    return this.creationsService.findOne(term);
+  }
   // TODO: Buscar creaciones por Tags. Se necesita haber creado el módulo de Tags previamente
 }

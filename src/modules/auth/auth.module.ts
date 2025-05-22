@@ -1,19 +1,20 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
-import { AuthService } from '@/modules/auth/services/auth.service';
-import { AuthController } from './controllers/auth.controller';
-
-import { User } from '../users/entities/user.entity';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+
 import { JWTStrategy } from './strategies/jwt.strategy';
+import { AuthService } from '@/modules/auth/services/auth.service';
+import { AuthController } from './controllers/auth.controller';
+import { User } from '../users/entities/user.entity';
+import { Creation } from '../creations/entities/creation.entity';
+import { CreationCollaboration } from '../creations/entities/creation-collaboration.entity';
 
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Creation, CreationCollaboration]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
 
     /* Uso 'registerAsync' porque podría pasar en el futuro de que necesito servicios/apis externos a los que hay que llamar y obtener data. Esto es lo más escalable para el futuro.

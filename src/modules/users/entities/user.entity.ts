@@ -1,3 +1,4 @@
+import { CreationCollaboration } from '@/modules/creations/entities/creation-collaboration.entity';
 import { Creation } from '@/modules/creations/entities/creation.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -26,4 +27,9 @@ export class User {
     { cascade: true }, // y finalmente delete on cascade: cuando se elimine este usuario elimina todas sus creaciones
   )
   creations?: Creation[];
+
+  @OneToMany(() => CreationCollaboration, (creationCollaboration) => creationCollaboration.user, {
+    cascade: true,
+  })
+  creation_collaborations?: CreationCollaboration[];
 }
