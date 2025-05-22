@@ -28,8 +28,8 @@ export class CreationsController {
   // Solicitudes de Colaboración
   @Get('collaborations')
   @AuthenticateByAuthorOwnership()
-  getCollaborationPetition() {
-    return 'Estás en el buen recurso';
+  getCollaborationPetition(@Query('id', ParseUUIDPipe) creation_id: string) {
+    return this.creationsService.getCollaborationPetition(creation_id);
   }
 
   @Post('collaborations')

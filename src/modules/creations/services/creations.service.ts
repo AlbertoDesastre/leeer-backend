@@ -129,6 +129,24 @@ export class CreationsService {
 
   // Colaboraciones
 
+  //Este método no me parece realista. Tengo que tener un método que liste  todas las peticiones de colaboración relacionadas con un creation_id.
+  // Luego debo tener la opción de ver MIS peticiones.
+  // Luego otra llamada para ver una petición concreta, que eso se hace por ID de la petición, en realidad
+  async getCollaborationPetition(creation_id: string): Promise<CreationCollaboration> {
+    const collaboration = await this.creationCollaborationRepository.findOne({
+      where: {
+        creation: { creation_id },
+      },
+    });
+
+    if (!collaboration)
+      throw new NotFoundException(
+        'No hay ninguna colaboración relacionada con esta creación que aplique a tu búsqueda.',
+      );
+
+    return collaboration;
+  }
+
   async sendCollaborationPetition(
     user: User,
     creation_id: string,
@@ -142,11 +160,9 @@ export class CreationsService {
       ...createCollaborationPetitionDto,
     });
 
-    console.log(creationCollab);
-
     try {
-      await this.creationsRepository.save(creation);
-      return creation;
+      await this.creationCollaborationRepository.save(creationCollab);
+      return { creation, creationCollab };
     } catch (error) {
       this.handleException(error);
     }

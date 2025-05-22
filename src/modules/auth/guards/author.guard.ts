@@ -32,7 +32,7 @@ export class AuthorGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const creation_id = request.query.id as string;
     const user = request.user; // se que va a venir porque esto vendrá después del Guard de Auth, que me trae el usuario a través de su token JWT
-    let roles: VALID_ROLES[];
+    let roles: VALID_ROLES[] = [];
 
     if (!creation_id) throw new InternalServerErrorException('No hay ningún ID en la request.');
 
@@ -45,7 +45,6 @@ export class AuthorGuard implements CanActivate {
     if (creation.user.user_id === user.user_id) {
       // el usuario que accede al recurso es el autor original y por lo tanto tiene todos los permisos
       roles.push(VALID_ROLES.ORIGINAL_AUTHOR, VALID_ROLES.COLLABORATOR);
-      console.log(creation, 'Es autor original!!');
     } else {
       // Si no es autor original se verifica si al menos es colaborador
       const collaboration = await this.creationCollaborationRepository.findOne({
@@ -53,16 +52,14 @@ export class AuthorGuard implements CanActivate {
           creation: { creation_id },
           user: { user_id: user.user_id },
         },
-        relations: ['user', 'creation'],
       });
-
-      console.log(collaboration, 'Es colaborador!!');
 
       if (collaboration) {
         roles.push(VALID_ROLES.COLLABORATOR);
       }
     }
 
+    // Si no encontró ni siquiera una collaboration es que no existe.
     if (roles.length === 0) {
       throw new ForbiddenException(
         'No tienes permitido acceder a este recurso, no eres ni autor ni colaborador.',
