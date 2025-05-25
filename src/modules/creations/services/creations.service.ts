@@ -18,6 +18,7 @@ import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 import { User } from '@/modules/users/entities/user.entity';
 import { CreationCollaboration } from '../entities/creation-collaboration.entity';
 import { CreateCollaborationPetitionDto } from '../dto/create-creation-collaboration-petition.dto';
+import { CollaborationPaginationDto } from '@/modules/common/dto/collaborations-pagination-dto.dto';
 
 @Injectable()
 export class CreationsService {
@@ -132,11 +133,11 @@ export class CreationsService {
   //Este método no me parece realista. Tengo que tener un método que liste  todas las peticiones de colaboración relacionadas con un creation_id.
   // Luego debo tener la opción de ver MIS peticiones.
   // Luego otra llamada para ver una petición concreta, que eso se hace por ID de la petición, en realidad
-  async getCollaborationPetition(creation_id: string): Promise<CreationCollaboration> {
-    const collaboration = await this.creationCollaborationRepository.findOne({
-      where: {
-        creation: { creation_id },
-      },
+  async getCollaborationPetition(
+    creation_collaboration_id: string,
+  ): Promise<CreationCollaboration> {
+    const collaboration = await this.creationCollaborationRepository.findOneBy({
+      creation_collaboration_id,
     });
 
     if (!collaboration)
@@ -166,6 +167,28 @@ export class CreationsService {
     } catch (error) {
       this.handleException(error);
     }
+  }
+
+  // TODO: Que este método devuelva todas las peticiones si eres el autor original y, si no, que te devuelva solo tus peticiones.
+  async findAllCollaborationPetitions(
+    user: User,
+    collaborationPaginationDto: CollaborationPaginationDto,
+  ): Promise<CreationCollaboration[]> {
+    const { id, limit = this.paginationLimit, offset = 0 } = collaborationPaginationDto;
+    const { user_id } = user;
+
+    const collaborations = this.creationCollaborationRepository.find({
+      take: limit,
+      skip: offset,
+      where: { creation: { creation_id: id }, user: { user_id } },
+    });
+
+    if (!collaborations)
+      throw new NotFoundException(
+        'No se han encontrado solicitud de colaboración con esta creación.',
+      );
+
+    return collaborations;
   }
 
   handleException(error) {

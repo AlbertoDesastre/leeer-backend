@@ -20,6 +20,7 @@ import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 import { User } from '@/modules/users/entities/user.entity';
 import { CreateCollaborationPetitionDto } from '../dto/create-creation-collaboration-petition.dto';
 import { AuthenticateByAuthorOwnership } from '@/modules/auth/decorators/authenticate-by-author-ownership.decorator';
+import { CollaborationPaginationDto } from '@/modules/common/dto/collaborations-pagination-dto.dto';
 
 @Controller('creations')
 export class CreationsController {
@@ -28,8 +29,20 @@ export class CreationsController {
   // Solicitudes de Colaboración
   @Get('collaborations')
   @AuthenticateByAuthorOwnership()
-  getCollaborationPetition(@Query('id', ParseUUIDPipe) creation_id: string) {
-    return this.creationsService.getCollaborationPetition(creation_id);
+  getCollaborationPetition(
+    // Solo necesitamos el collaboration_petition_id, el creation_id se obtiene internamente mediante el Guard
+    @Query('collaboration_petition_id', ParseUUIDPipe) creation_collaboration_id: string,
+  ) {
+    return this.creationsService.getCollaborationPetition(creation_collaboration_id);
+  }
+
+  @Get('collaborations/all')
+  @AuthenticateByAuthorOwnership()
+  findAllCollaborationPetitions(
+    @GetUser() user: User,
+    @Query() collaborationPaginationDto: CollaborationPaginationDto,
+  ) {
+    return this.creationsService.findAllCollaborationPetitions(user, collaborationPaginationDto);
   }
 
   @Post('collaborations')
@@ -71,5 +84,4 @@ export class CreationsController {
   findOne(@Param('term') term: string) {
     return this.creationsService.findOne(term);
   }
-  // TODO: Buscar creaciones por Tags. Se necesita haber creado el módulo de Tags previamente
 }
