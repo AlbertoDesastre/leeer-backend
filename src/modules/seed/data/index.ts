@@ -1,7 +1,6 @@
-import { CreateUserDto } from '@/modules/users/dto/create-user.dto';
-
-export const usersSeed: CreateUserDto[] = [
+export const usersSeed = [
   {
+    user_id: 'dea601c8-697b-477c-aa09-ba4dd238d7f2',
     nickname: 'AgathaChristie',
     email: 'agatha.christie@mail.com',
     profile_picture: 'https://example.com/avatar1.png',
@@ -9,6 +8,7 @@ export const usersSeed: CreateUserDto[] = [
     password: 'FuertePassw0rd!',
   },
   {
+    user_id: '09ba921e-4f3e-4cd5-937c-6bae81ebaadd',
     nickname: 'IsaacAsimov',
     email: 'isaac.asimov@ficcion.com',
     profile_picture: 'https://example.com/avatar2.png',
@@ -16,6 +16,7 @@ export const usersSeed: CreateUserDto[] = [
     password: 'C0ntraseñaSegura!',
   },
   {
+    user_id: '6dfc166a-44c0-4c07-b666-d8f31a6ba278',
     nickname: 'UrsulaLeGuin',
     email: 'ursula.leguin@mail.com',
     profile_picture: 'https://example.com/avatar3.jpg',
@@ -23,6 +24,7 @@ export const usersSeed: CreateUserDto[] = [
     password: 'EditorP@ss123!',
   },
   {
+    user_id: '718f8c2b-95d0-41e1-8d16-9bcecbf3e122',
     nickname: 'JRR_Tolkien',
     email: 'tolkien@middleearth.com',
     profile_picture: 'https://example.com/avatar4.jpg',
@@ -30,6 +32,7 @@ export const usersSeed: CreateUserDto[] = [
     password: 'TolkienSecure!',
   },
   {
+    user_id: 'cb3e0c56-e6b1-49c7-8447-991ae5248af9',
     nickname: 'GeorgeOrwell',
     email: 'orwell@1984.net',
     profile_picture: 'https://example.com/avatar5.jpg',
@@ -37,6 +40,7 @@ export const usersSeed: CreateUserDto[] = [
     password: 'BigBrother123!',
   },
   {
+    user_id: 'ff09a313-dc1a-4293-9dd4-32fcfae4d3d3',
     nickname: 'TerryPratchett',
     email: 'pratchett@discworld.org',
     profile_picture: 'https://example.com/avatar6.jpg',
@@ -44,38 +48,35 @@ export const usersSeed: CreateUserDto[] = [
     password: 'DiscWorldR0cks!',
   },
   {
+    user_id: 'f2e6e9b7-1d42-4bcf-b3db-c2d4b02e63e2',
     nickname: 'MaryShelley',
     email: 'mary.shelley@gothic.com',
     profile_picture: 'https://example.com/avatar7.jpg',
-    description: 'Pionera de la ciencia ficción con "Frankenstein".',
-    password: 'Frankenstein2025!',
+    description: 'Pionera del horror y la ciencia ficción.',
+    password: 'Frankenstein123!',
   },
   {
+    user_id: '2c44df6c-39b1-4646-b6f2-fbf0e08a9c4d',
     nickname: 'PhilipKDick',
-    email: 'philip.k.dick@altreality.org',
-    profile_picture: 'https://example.com/avatar8.png',
-    description: 'Maestro de la paranoia y los mundos alternativos.',
-    password: 'DoAndroidsDream!',
+    email: 'pkd@reality.net',
+    profile_picture: 'https://example.com/avatar8.jpg',
+    description: 'Narrador de realidades alternativas.',
+    password: 'BladeRunn3r!',
   },
   {
-    nickname: 'JaneAusten',
-    email: 'jane.austen@classics.uk',
-    profile_picture: 'https://example.com/avatar9.jpg',
-    description: 'Clásica novelista de la crítica social y el romance.',
-    password: 'PridePrejudice!',
-  },
-  {
-    nickname: 'NeilGaiman',
-    email: 'gaiman@fantasy.net',
-    profile_picture: 'https://example.com/avatar10.jpg',
-    description: 'Narrador moderno de lo fantástico y lo oscuro.',
-    password: 'SandmanSecure!',
-  },
-  {
+    user_id: '96a8c9d6-5178-4be4-85b3-d067bfb7ce0d',
     nickname: 'OctaviaButler',
-    email: 'octavia.butler@speculative.com',
-    profile_picture: 'https://example.com/avatar11.jpg',
-    description: 'Pionera afroamericana en ciencia ficción especulativa.',
-    password: 'PatternMaster#1',
+    email: 'octavia@afrofuturismo.com',
+    profile_picture: 'https://example.com/avatar9.jpg',
+    description: 'Referente del afrofuturismo y la especulación.',
+    password: 'PatternM4ster!',
+  },
+  {
+    user_id: 'a843dc51-eaec-45f2-b632-7a96a7cc4f94',
+    nickname: 'RayBradbury',
+    email: 'ray.bradbury@mars.com',
+    profile_picture: 'https://example.com/avatar10.jpg',
+    description: 'Soñador de mundos imposibles y poéticos.',
+    password: 'Fahrenheit451!',
   },
 ];
