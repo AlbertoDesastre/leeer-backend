@@ -5,7 +5,7 @@ export const usersSeed = [
     email: 'agatha.christie@mail.com',
     profile_picture: 'https://example.com/avatar1.png',
     description: 'Maestra del misterio y el crimen.',
-    password: 'FuertePassw0rd!',
+    password: 'C0ntraseñaSegura!',
   },
   {
     user_id: '09ba921e-4f3e-4cd5-937c-6bae81ebaadd',
@@ -21,7 +21,7 @@ export const usersSeed = [
     email: 'ursula.leguin@mail.com',
     profile_picture: 'https://example.com/avatar3.jpg',
     description: 'Autora de mundos imaginarios y crítica social.',
-    password: 'EditorP@ss123!',
+    password: 'C0ntraseñaSegura!',
   },
   {
     user_id: '718f8c2b-95d0-41e1-8d16-9bcecbf3e122',
@@ -29,7 +29,7 @@ export const usersSeed = [
     email: 'tolkien@middleearth.com',
     profile_picture: 'https://example.com/avatar4.jpg',
     description: 'Padre de la fantasía épica moderna.',
-    password: 'TolkienSecure!',
+    password: 'C0ntraseñaSegura!',
   },
   {
     user_id: 'cb3e0c56-e6b1-49c7-8447-991ae5248af9',
@@ -37,7 +37,7 @@ export const usersSeed = [
     email: 'orwell@1984.net',
     profile_picture: 'https://example.com/avatar5.jpg',
     description: 'Crítico social y autor distópico.',
-    password: 'BigBrother123!',
+    password: 'C0ntraseñaSegura!',
   },
   {
     user_id: 'ff09a313-dc1a-4293-9dd4-32fcfae4d3d3',
@@ -45,7 +45,7 @@ export const usersSeed = [
     email: 'pratchett@discworld.org',
     profile_picture: 'https://example.com/avatar6.jpg',
     description: 'Humor y fantasía con sátira inteligente.',
-    password: 'DiscWorldR0cks!',
+    password: 'C0ntraseñaSegura!',
   },
   {
     user_id: 'f2e6e9b7-1d42-4bcf-b3db-c2d4b02e63e2',
@@ -53,7 +53,7 @@ export const usersSeed = [
     email: 'mary.shelley@gothic.com',
     profile_picture: 'https://example.com/avatar7.jpg',
     description: 'Pionera del horror y la ciencia ficción.',
-    password: 'Frankenstein123!',
+    password: 'C0ntraseñaSegura!',
   },
   {
     user_id: '2c44df6c-39b1-4646-b6f2-fbf0e08a9c4d',
@@ -61,7 +61,7 @@ export const usersSeed = [
     email: 'pkd@reality.net',
     profile_picture: 'https://example.com/avatar8.jpg',
     description: 'Narrador de realidades alternativas.',
-    password: 'BladeRunn3r!',
+    password: 'C0ntraseñaSegura!',
   },
   {
     user_id: '96a8c9d6-5178-4be4-85b3-d067bfb7ce0d',
@@ -69,7 +69,7 @@ export const usersSeed = [
     email: 'octavia@afrofuturismo.com',
     profile_picture: 'https://example.com/avatar9.jpg',
     description: 'Referente del afrofuturismo y la especulación.',
-    password: 'PatternM4ster!',
+    password: 'C0ntraseñaSegura!',
   },
   {
     user_id: 'a843dc51-eaec-45f2-b632-7a96a7cc4f94',
@@ -77,6 +77,6 @@ export const usersSeed = [
     email: 'ray.bradbury@mars.com',
     profile_picture: 'https://example.com/avatar10.jpg',
     description: 'Soñador de mundos imposibles y poéticos.',
-    password: 'Fahrenheit451!',
+    password: 'C0ntraseñaSegura!',
   },
 ];
