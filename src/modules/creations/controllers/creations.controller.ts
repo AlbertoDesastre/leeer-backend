@@ -38,8 +38,11 @@ export class CreationsController {
 
   @Get('collaborations/all')
   @AuthenticateByAuthorOwnership()
-  findAllCollaborationPetitions(@Query() collaborationPaginationDto: CollaborationPaginationDto) {
-    return this.creationsService.findAllCollaborationPetitions(collaborationPaginationDto);
+  findAllCollaborationPetitions(
+    @GetUser() user: User,
+    @Query() collaborationPaginationDto: CollaborationPaginationDto,
+  ) {
+    return this.creationsService.findAllCollaborationPetitions(user, collaborationPaginationDto);
   }
 
   @Post('collaborations')

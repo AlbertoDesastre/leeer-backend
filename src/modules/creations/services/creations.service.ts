@@ -169,15 +169,18 @@ export class CreationsService {
     }
   }
 
+  // TODO: Que este método devuelva todas las peticiones si eres el autor original y, si no, que te devuelva solo tus peticiones.
   async findAllCollaborationPetitions(
+    user: User,
     collaborationPaginationDto: CollaborationPaginationDto,
   ): Promise<CreationCollaboration[]> {
     const { id, limit = this.paginationLimit, offset = 0 } = collaborationPaginationDto;
+    const { user_id } = user;
 
     const collaborations = this.creationCollaborationRepository.find({
       take: limit,
       skip: offset,
-      where: { creation: { creation_id: id } },
+      where: { creation: { creation_id: id }, user: { user_id } },
     });
 
     if (!collaborations)
