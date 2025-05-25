@@ -1,0 +1,81 @@
+import { CreateUserDto } from '@/modules/users/dto/create-user.dto';
+
+export const usersSeed: CreateUserDto[] = [
+  {
+    nickname: 'AgathaChristie',
+    email: 'agatha.christie@mail.com',
+    profile_picture: 'https://example.com/avatar1.png',
+    description: 'Maestra del misterio y el crimen.',
+    password: 'FuertePassw0rd!',
+  },
+  {
+    nickname: 'IsaacAsimov',
+    email: 'isaac.asimov@ficcion.com',
+    profile_picture: 'https://example.com/avatar2.png',
+    description: 'Escritor de ciencia ficción y divulgador científico.',
+    password: 'C0ntraseñaSegura!',
+  },
+  {
+    nickname: 'UrsulaLeGuin',
+    email: 'ursula.leguin@mail.com',
+    profile_picture: 'https://example.com/avatar3.jpg',
+    description: 'Autora de mundos imaginarios y crítica social.',
+    password: 'EditorP@ss123!',
+  },
+  {
+    nickname: 'JRR_Tolkien',
+    email: 'tolkien@middleearth.com',
+    profile_picture: 'https://example.com/avatar4.jpg',
+    description: 'Padre de la fantasía épica moderna.',
+    password: 'TolkienSecure!',
+  },
+  {
+    nickname: 'GeorgeOrwell',
+    email: 'orwell@1984.net',
+    profile_picture: 'https://example.com/avatar5.jpg',
+    description: 'Crítico social y autor distópico.',
+    password: 'BigBrother123!',
+  },
+  {
+    nickname: 'TerryPratchett',
+    email: 'pratchett@discworld.org',
+    profile_picture: 'https://example.com/avatar6.jpg',
+    description: 'Humor y fantasía con sátira inteligente.',
+    password: 'DiscWorldR0cks!',
+  },
+  {
+    nickname: 'MaryShelley',
+    email: 'mary.shelley@gothic.com',
+    profile_picture: 'https://example.com/avatar7.jpg',
+    description: 'Pionera de la ciencia ficción con "Frankenstein".',
+    password: 'Frankenstein2025!',
+  },
+  {
+    nickname: 'PhilipKDick',
+    email: 'philip.k.dick@altreality.org',
+    profile_picture: 'https://example.com/avatar8.png',
+    description: 'Maestro de la paranoia y los mundos alternativos.',
+    password: 'DoAndroidsDream!',
+  },
+  {
+    nickname: 'JaneAusten',
+    email: 'jane.austen@classics.uk',
+    profile_picture: 'https://example.com/avatar9.jpg',
+    description: 'Clásica novelista de la crítica social y el romance.',
+    password: 'PridePrejudice!',
+  },
+  {
+    nickname: 'NeilGaiman',
+    email: 'gaiman@fantasy.net',
+    profile_picture: 'https://example.com/avatar10.jpg',
+    description: 'Narrador moderno de lo fantástico y lo oscuro.',
+    password: 'SandmanSecure!',
+  },
+  {
+    nickname: 'OctaviaButler',
+    email: 'octavia.butler@speculative.com',
+    profile_picture: 'https://example.com/avatar11.jpg',
+    description: 'Pionera afroamericana en ciencia ficción especulativa.',
+    password: 'PatternMaster#1',
+  },
+];

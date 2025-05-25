@@ -9,6 +9,7 @@ import { User } from './modules/users/entities/user.entity';
 import { CommonModule } from './modules/common/common.module';
 import { CreationsModule } from './modules/creations/creations.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { SeedModule } from './modules/seed/seed.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { AuthModule } from './modules/auth/auth.module';
     CommonModule,
     CreationsModule,
     AuthModule,
+    SeedModule,
   ],
   controllers: [],
   providers: [],

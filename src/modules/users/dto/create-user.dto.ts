@@ -10,8 +10,6 @@ export class CreateUserDto {
   readonly profile_picture: string;
   @IsString()
   readonly description: string;
-  @IsString()
-  readonly token: string;
   @IsStrongPassword(
     { minLength: 10, minUppercase: 1, minNumbers: 1, minSymbols: 1 },
     {
