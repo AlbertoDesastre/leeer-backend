@@ -36,7 +36,8 @@ export class SeedService {
         user_id: user.user_id,
         title: `Obra de ${user.nickname}`,
         synopsis: `Una obra creada por ${user.nickname} como parte del seeder.`,
-        isDraft: !!Math.round(Math.random()), // esto es equivalente a escoger aleatoriamente entre 0 y 1, que luego transformo a boolean con "!!"
+        // isDraft: !!Math.round(Math.random()) esto es equivalente a escoger aleatoriamente entre 0 y 1, que luego transformo a boolean con "!!"
+        isDraft: null, // null indica que la petición está pendiente o bien de ser aprobada o bien ser rechazada
         thumbnail: `https://example.com/${user.nickname.toLowerCase()}.jpg`,
       };
 
@@ -66,7 +67,7 @@ export class SeedService {
       if (collaborator.user_id === authorId) continue;
 
       const collaborationPetition: CreateCollaborationPetitionDto = {
-        approved_by_original_author: false,
+        approved_by_original_author: null,
         is_fanfiction: false,
         is_spin_off: true,
         is_canon: true,

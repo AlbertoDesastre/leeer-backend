@@ -21,28 +21,42 @@ import { User } from '@/modules/users/entities/user.entity';
 import { CreateCollaborationPetitionDto } from '../dto/create-creation-collaboration-petition.dto';
 import { AuthenticateByAuthorOwnership } from '@/modules/auth/decorators/authenticate-by-author-ownership.decorator';
 import { CollaborationPaginationDto } from '@/modules/common/dto/collaborations-pagination-dto.dto';
+import { VALID_ROLES } from '@/modules/auth/interfaces/valid-roles';
+import { UpdateCreationCollaborationDto } from '../dto/update-creation-collaboration-petition.dto';
 
 @Controller('creations')
 export class CreationsController {
   constructor(private readonly creationsService: CreationsService) {}
 
   // Solicitudes de Colaboración
+  // Este método obtiene todas las peticiones a una obra concreta
   @Get('collaborations')
-  @AuthenticateByAuthorOwnership()
+  @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR, VALID_ROLES.COLLABORATOR)
   getCollaborationPetition(
     // Solo necesitamos el collaboration_petition_id, el creation_id se obtiene internamente mediante el Guard
+    @GetUser() user: User,
     @Query('collaboration_petition_id', ParseUUIDPipe) creation_collaboration_id: string,
   ) {
-    return this.creationsService.getCollaborationPetition(creation_collaboration_id);
+    return this.creationsService.getCollaborationPetition(user, creation_collaboration_id);
   }
 
+  // Este método encuentra todas las peticiones que haya mandado o recibido el usuario.
   @Get('collaborations/all')
-  @AuthenticateByAuthorOwnership()
-  findAllCollaborationPetitions(
+  @Authenticate()
+  findAllCollaborationPetitions(@GetUser() user: User, @Query() paginationDto: PaginationDto) {
+    return this.creationsService.findAllCollaborationPetitions(user, paginationDto);
+  }
+
+  @Get('collaborations/all/for')
+  @Authenticate()
+  findAllCollaborationPetitionsByCreation(
     @GetUser() user: User,
-    @Query() collaborationPaginationDto: CollaborationPaginationDto,
+    @Query() collaborationPetitionPaginationDto: CollaborationPaginationDto,
   ) {
-    return this.creationsService.findAllCollaborationPetitions(user, collaborationPaginationDto);
+    return this.creationsService.findAllCollaborationPetitionsByCreation(
+      user,
+      collaborationPetitionPaginationDto,
+    );
   }
 
   @Post('collaborations')
@@ -56,6 +70,18 @@ export class CreationsController {
       user,
       creation_id,
       createCollaborationPetitionDto,
+    );
+  }
+
+  @Patch('collaborations')
+  @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR)
+  updateCollaborationPetition(
+    @Query('collaboration_id', ParseUUIDPipe) creation_collaboration_id: string,
+    @Body() updateCreationCollaborationDto: UpdateCreationCollaborationDto,
+  ) {
+    return this.creationsService.updateCollaborationPetition(
+      creation_collaboration_id,
+      updateCreationCollaborationDto,
     );
   }
 

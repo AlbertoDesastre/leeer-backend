@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -19,6 +20,7 @@ import { User } from '@/modules/users/entities/user.entity';
 import { CreationCollaboration } from '../entities/creation-collaboration.entity';
 import { CreateCollaborationPetitionDto } from '../dto/create-creation-collaboration-petition.dto';
 import { CollaborationPaginationDto } from '@/modules/common/dto/collaborations-pagination-dto.dto';
+import { UpdateCreationCollaborationDto } from '../dto/update-creation-collaboration-petition.dto';
 
 @Injectable()
 export class CreationsService {
@@ -130,20 +132,31 @@ export class CreationsService {
 
   // Colaboraciones
 
-  //Este método no me parece realista. Tengo que tener un método que liste  todas las peticiones de colaboración relacionadas con un creation_id.
   // Luego debo tener la opción de ver MIS peticiones.
   // Luego otra llamada para ver una petición concreta, que eso se hace por ID de la petición, en realidad
   async getCollaborationPetition(
+    user: User,
     creation_collaboration_id: string,
   ): Promise<CreationCollaboration> {
-    const collaboration = await this.creationCollaborationRepository.findOneBy({
-      creation_collaboration_id,
+    const { user_id } = user;
+
+    const collaboration = await this.creationCollaborationRepository.findOne({
+      where: {
+        creation_collaboration_id,
+      },
     });
 
     if (!collaboration)
       throw new NotFoundException(
         'No hay ninguna colaboración relacionada con esta creación que aplique a tu búsqueda.',
       );
+
+    // Si el usuario es colaborador o es el autor original tiene permiso para ver la petición
+    if (collaboration.user.user_id != user_id && collaboration.creation.user.user_id != user_id) {
+      throw new ForbiddenException(
+        'No puedes ver esta petición porque no es tuya o no eres el autor original.',
+      );
+    }
 
     return collaboration;
   }
@@ -169,26 +182,99 @@ export class CreationsService {
     }
   }
 
-  // TODO: Que este método devuelva todas las peticiones si eres el autor original y, si no, que te devuelva solo tus peticiones.
+  // Comentario del dev: Este es mi método favorito porque mezcla muchas cosas y devuelve un dato bonito y entendible.
   async findAllCollaborationPetitions(
+    user: User,
+    paginationDto: PaginationDto,
+  ): Promise<{ received: CreationCollaboration[]; sent: CreationCollaboration[] }> {
+    const { limit = this.paginationLimit, offset = 0 } = paginationDto;
+    const { user_id } = user;
+    let collaborations: CreationCollaboration[] = [];
+
+    const query = this.creationCollaborationRepository
+      .createQueryBuilder('creationCollab')
+      .leftJoinAndSelect('creationCollab.user', 'collabUser')
+      .leftJoinAndSelect('creationCollab.creation', 'creac')
+      .leftJoinAndSelect('creac.user', 'authorUser')
+      .where('creationCollab.user.user_id = :user_id OR creac.user.user_id = :user_id', {
+        user_id,
+      })
+      .skip(offset)
+      .limit(limit)
+      .getMany();
+
+    collaborations = await query;
+
+    if (!collaborations)
+      throw new NotFoundException('No has mandado ni recibido ninguna solicitud de colaboración.');
+
+    let received: CreationCollaboration[] = [];
+    let sent: CreationCollaboration[] = [];
+
+    collaborations.forEach((collaboration) => {
+      if (collaboration.user.user_id === user_id) sent.push(collaboration); // acumula todas las colaboraciones que este usuario mandó a otros autores.
+      if (collaboration.creation.user.user_id === user_id) received.push(collaboration); // aquí el autor que manda esta request observa las peticiones recibidas por otros usuarios
+    });
+
+    return { received, sent };
+  }
+
+  async findAllCollaborationPetitionsByCreation(
     user: User,
     collaborationPaginationDto: CollaborationPaginationDto,
   ): Promise<CreationCollaboration[]> {
     const { id, limit = this.paginationLimit, offset = 0 } = collaborationPaginationDto;
     const { user_id } = user;
+    let collaborations: CreationCollaboration[] = [];
 
-    const collaborations = this.creationCollaborationRepository.find({
+    const creation = await this.findOne(id); // Recuerdo que este método ya devuelve un NotFound si no lo encuentra.
+    const isAuthor = creation.user.user_id === user_id;
+
+    // El usuario que manda la petición es el autor original y por lo tanto puede ver todas las peticiones de su obra. Si es el peticionador, solo podrá ver las suyas
+    const condition = isAuthor
+      ? { creation: { creation_id: id } }
+      : { creation: { creation_id: id }, user: { user_id } };
+
+    collaborations = await this.creationCollaborationRepository.find({
       take: limit,
       skip: offset,
-      where: { creation: { creation_id: id }, user: { user_id } },
+      where: condition,
     });
 
-    if (!collaborations)
+    if (collaborations.length === 0) {
       throw new NotFoundException(
-        'No se han encontrado solicitud de colaboración con esta creación.',
+        isAuthor
+          ? 'No tienes ninguna petición de colaboración para esta obra.'
+          : 'No has mandado ninguna solicitud de colaboración a esta creación.',
       );
+    }
 
     return collaborations;
+  }
+
+  async updateCollaborationPetition(
+    creation_collaboration_id: string,
+    updateCreationCollaborationDto: UpdateCreationCollaborationDto,
+  ): Promise<CreationCollaboration> {
+    let collaboration = await this.creationCollaborationRepository.preload({
+      creation_collaboration_id,
+      ...updateCreationCollaborationDto,
+    });
+
+    if (!collaboration)
+      // BadRequestException me lo trae de serie Nest
+      throw new BadRequestException(
+        `La petición de colaboración con id ${creation_collaboration_id} no existe y no se actualizó.`,
+      );
+
+    try {
+      await this.creationCollaborationRepository.save(collaboration);
+      return collaboration;
+    } catch (error) {
+      this.handleException(error);
+    }
+
+    return collaboration;
   }
 
   handleException(error) {
