@@ -3,7 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 
 import { VALID_ROLES } from '../interfaces/valid-roles';
 import { USER_ROLES } from './decorators.decorator';
-import { RolesGuard } from '../guards/auth.guard';
+import { RolesGuard } from '../guards/roles.guard';
 
 /* Esto es composición de decoradores. Puedo activar varios decoradores en secuencia para ahorrarme líneas de código. Fuente: https://docs.nestjs.com/custom-decorators#decorator-composition */
 export function Authenticate(...roles: VALID_ROLES[]) {
