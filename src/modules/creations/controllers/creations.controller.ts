@@ -21,6 +21,7 @@ import { User } from '@/modules/users/entities/user.entity';
 import { CreateCollaborationPetitionDto } from '../dto/create-creation-collaboration-petition.dto';
 import { AuthenticateByAuthorOwnership } from '@/modules/auth/decorators/authenticate-by-author-ownership.decorator';
 import { CollaborationPaginationDto } from '@/modules/common/dto/collaborations-pagination-dto.dto';
+import { VALID_ROLES } from '@/modules/auth/interfaces/valid-roles';
 
 @Controller('creations')
 export class CreationsController {
@@ -28,12 +29,13 @@ export class CreationsController {
 
   // Solicitudes de Colaboración
   @Get('collaborations')
-  @AuthenticateByAuthorOwnership()
+  @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR, VALID_ROLES.COLLABORATOR)
   getCollaborationPetition(
     // Solo necesitamos el collaboration_petition_id, el creation_id se obtiene internamente mediante el Guard
+    @GetUser() user: User,
     @Query('collaboration_petition_id', ParseUUIDPipe) creation_collaboration_id: string,
   ) {
-    return this.creationsService.getCollaborationPetition(creation_collaboration_id);
+    return this.creationsService.getCollaborationPetition(user, creation_collaboration_id);
   }
 
   @Get('collaborations/all')

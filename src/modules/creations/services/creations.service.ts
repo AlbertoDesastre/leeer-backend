@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -134,16 +135,28 @@ export class CreationsService {
   // Luego debo tener la opción de ver MIS peticiones.
   // Luego otra llamada para ver una petición concreta, que eso se hace por ID de la petición, en realidad
   async getCollaborationPetition(
+    user: User,
     creation_collaboration_id: string,
   ): Promise<CreationCollaboration> {
-    const collaboration = await this.creationCollaborationRepository.findOneBy({
-      creation_collaboration_id,
+    const { user_id } = user;
+
+    const collaboration = await this.creationCollaborationRepository.findOne({
+      where: {
+        creation_collaboration_id,
+      },
     });
 
     if (!collaboration)
       throw new NotFoundException(
         'No hay ninguna colaboración relacionada con esta creación que aplique a tu búsqueda.',
       );
+
+    // Si el usuario es colaborador o es el autor original tiene permiso para ver la petición
+    if (collaboration.user.user_id != user_id && collaboration.creation.user.user_id != user_id) {
+      throw new ForbiddenException(
+        'No puedes ver esta petición porque no es tuya o no eres el autor original.',
+      );
+    }
 
     return collaboration;
   }
