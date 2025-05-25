@@ -28,6 +28,7 @@ export class CreationsController {
   constructor(private readonly creationsService: CreationsService) {}
 
   // Solicitudes de Colaboración
+  // Este método obtiene todas las peticiones a una obra concreta
   @Get('collaborations')
   @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR, VALID_ROLES.COLLABORATOR)
   getCollaborationPetition(
@@ -38,13 +39,11 @@ export class CreationsController {
     return this.creationsService.getCollaborationPetition(user, creation_collaboration_id);
   }
 
+  // Este método encuentra todas las peticiones que haya mandado o recibido el usuario.
   @Get('collaborations/all')
-  @AuthenticateByAuthorOwnership()
-  findAllCollaborationPetitions(
-    @GetUser() user: User,
-    @Query() collaborationPaginationDto: CollaborationPaginationDto,
-  ) {
-    return this.creationsService.findAllCollaborationPetitions(user, collaborationPaginationDto);
+  @Authenticate()
+  findAllCollaborationPetitions(@GetUser() user: User, @Query() paginationDto: PaginationDto) {
+    return this.creationsService.findAllCollaborationPetitions(user, paginationDto);
   }
 
   @Post('collaborations')
