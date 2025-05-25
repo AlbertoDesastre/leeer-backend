@@ -18,6 +18,7 @@ import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 import { User } from '@/modules/users/entities/user.entity';
 import { CreationCollaboration } from '../entities/creation-collaboration.entity';
 import { CreateCollaborationPetitionDto } from '../dto/create-creation-collaboration-petition.dto';
+import { CollaborationPaginationDto } from '@/modules/common/dto/collaborations-pagination-dto.dto';
 
 @Injectable()
 export class CreationsService {
@@ -166,6 +167,25 @@ export class CreationsService {
     } catch (error) {
       this.handleException(error);
     }
+  }
+
+  async findAllCollaborationPetitions(
+    collaborationPaginationDto: CollaborationPaginationDto,
+  ): Promise<CreationCollaboration[]> {
+    const { id, limit = this.paginationLimit, offset = 0 } = collaborationPaginationDto;
+
+    const collaborations = this.creationCollaborationRepository.find({
+      take: limit,
+      skip: offset,
+      where: { creation: { creation_id: id } },
+    });
+
+    if (!collaborations)
+      throw new NotFoundException(
+        'No se han encontrado solicitud de colaboración con esta creación.',
+      );
+
+    return collaborations;
   }
 
   handleException(error) {

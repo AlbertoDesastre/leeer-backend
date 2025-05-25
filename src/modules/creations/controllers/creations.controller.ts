@@ -20,6 +20,7 @@ import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 import { User } from '@/modules/users/entities/user.entity';
 import { CreateCollaborationPetitionDto } from '../dto/create-creation-collaboration-petition.dto';
 import { AuthenticateByAuthorOwnership } from '@/modules/auth/decorators/authenticate-by-author-ownership.decorator';
+import { CollaborationPaginationDto } from '@/modules/common/dto/collaborations-pagination-dto.dto';
 
 @Controller('creations')
 export class CreationsController {
@@ -33,6 +34,12 @@ export class CreationsController {
     @Query('collaboration_petition_id', ParseUUIDPipe) creation_collaboration_id: string,
   ) {
     return this.creationsService.getCollaborationPetition(creation_collaboration_id);
+  }
+
+  @Get('collaborations/all')
+  @AuthenticateByAuthorOwnership()
+  findAllCollaborationPetitions(@Query() collaborationPaginationDto: CollaborationPaginationDto) {
+    return this.creationsService.findAllCollaborationPetitions(collaborationPaginationDto);
   }
 
   @Post('collaborations')
