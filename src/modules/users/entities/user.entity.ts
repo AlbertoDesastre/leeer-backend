@@ -15,8 +15,6 @@ export class User {
   profile_picture: string;
   @Column()
   description: string;
-  @Column()
-  token: string;
   @Column({ select: false })
   password: string;
 

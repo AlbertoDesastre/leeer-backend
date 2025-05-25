@@ -78,10 +78,10 @@ export class CreationsService {
 
   async findOne(term: string): Promise<Creation> {
     let creation: Creation;
-    console.log(term);
+
     if (isUuid(term)) {
       creation = await this.creationsRepository.findOneBy({ creation_id: term, is_draft: false });
-      console.log(creation);
+      // console.log(creation);
     } else {
       const query = this.creationsRepository.createQueryBuilder('creac');
       /* Esto está super guay! Es un Where clásico de MySQL sin tener que escribir ninguna claúsula, y TypeORM lo hace super flexible! */
