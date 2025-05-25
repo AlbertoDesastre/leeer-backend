@@ -85,6 +85,15 @@ export class CreationsController {
     );
   }
 
+  @Delete('collaborations')
+  @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR, VALID_ROLES.COLLABORATOR)
+  deleteCollaborationPetition(
+    @GetUser() user: User,
+    @Query('collaboration_id', ParseUUIDPipe) creation_collaboration_id: string,
+  ) {
+    return this.creationsService.deleteCollaborationPetition(user, creation_collaboration_id);
+  }
+
   // Creations
   @Post()
   create(@Body() createCreationDto: CreateCreationDto) {

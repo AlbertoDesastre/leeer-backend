@@ -131,13 +131,7 @@ export class CreationsService {
   }
 
   // Colaboraciones
-
-  // Luego debo tener la opción de ver MIS peticiones.
-  // Luego otra llamada para ver una petición concreta, que eso se hace por ID de la petición, en realidad
-  async getCollaborationPetition(
-    user: User,
-    creation_collaboration_id: string,
-  ): Promise<CreationCollaboration> {
+  async getCollaborationPetition(user: User, creation_collaboration_id: string) {
     const { user_id } = user;
 
     const collaboration = await this.creationCollaborationRepository.findOne({
@@ -183,10 +177,7 @@ export class CreationsService {
   }
 
   // Comentario del dev: Este es mi método favorito porque mezcla muchas cosas y devuelve un dato bonito y entendible.
-  async findAllCollaborationPetitions(
-    user: User,
-    paginationDto: PaginationDto,
-  ): Promise<{ received: CreationCollaboration[]; sent: CreationCollaboration[] }> {
+  async findAllCollaborationPetitions(user: User, paginationDto: PaginationDto) {
     const { limit = this.paginationLimit, offset = 0 } = paginationDto;
     const { user_id } = user;
     let collaborations: CreationCollaboration[] = [];
@@ -222,7 +213,7 @@ export class CreationsService {
   async findAllCollaborationPetitionsByCreation(
     user: User,
     collaborationPaginationDto: CollaborationPaginationDto,
-  ): Promise<CreationCollaboration[]> {
+  ) {
     const { id, limit = this.paginationLimit, offset = 0 } = collaborationPaginationDto;
     const { user_id } = user;
     let collaborations: CreationCollaboration[] = [];
@@ -255,7 +246,7 @@ export class CreationsService {
   async updateCollaborationPetition(
     creation_collaboration_id: string,
     updateCreationCollaborationDto: UpdateCreationCollaborationDto,
-  ): Promise<CreationCollaboration> {
+  ) {
     let collaboration = await this.creationCollaborationRepository.preload({
       creation_collaboration_id,
       ...updateCreationCollaborationDto,
@@ -275,6 +266,19 @@ export class CreationsService {
     }
 
     return collaboration;
+  }
+
+  async deleteCollaborationPetition(user: User, creation_collaboration_id: string) {
+    let collaboration = await this.getCollaborationPetition(user, creation_collaboration_id);
+
+    try {
+      await this.creationCollaborationRepository.delete({
+        creation_collaboration_id: collaboration.creation_collaboration_id,
+      });
+      return `La petición con id ${creation_collaboration_id} fue eliminada.`;
+    } catch (error) {
+      this.handleException(error);
+    }
   }
 
   handleException(error) {
