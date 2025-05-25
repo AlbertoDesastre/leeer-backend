@@ -46,6 +46,18 @@ export class CreationsController {
     return this.creationsService.findAllCollaborationPetitions(user, paginationDto);
   }
 
+  @Get('collaborations/all/for')
+  @Authenticate()
+  findAllCollaborationPetitionsByCreation(
+    @GetUser() user: User,
+    @Query() collaborationPetitionPaginationDto: CollaborationPaginationDto,
+  ) {
+    return this.creationsService.findAllCollaborationPetitionsByCreation(
+      user,
+      collaborationPetitionPaginationDto,
+    );
+  }
+
   @Post('collaborations')
   @Authenticate()
   sendCollaborationPetition(

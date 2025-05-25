@@ -219,11 +219,11 @@ export class CreationsService {
     return { received, sent };
   }
 
-  /*  async findAllCollaborationPetitions(
+  async findAllCollaborationPetitionsByCreation(
     user: User,
     collaborationPaginationDto: CollaborationPaginationDto,
   ): Promise<CreationCollaboration[]> {
-    const {  limit = this.paginationLimit, offset = 0 } = collaborationPaginationDto;
+    const { id, limit = this.paginationLimit, offset = 0 } = collaborationPaginationDto;
     const { user_id } = user;
     let collaborations: CreationCollaboration[] = [];
 
@@ -250,7 +250,7 @@ export class CreationsService {
     }
 
     return collaborations;
-  } */
+  }
 
   handleException(error) {
     this.logger.error(error); // en cualquier tipo de error me interesa el logeo.
