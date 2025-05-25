@@ -132,11 +132,11 @@ export class CreationsService {
   //Este método no me parece realista. Tengo que tener un método que liste  todas las peticiones de colaboración relacionadas con un creation_id.
   // Luego debo tener la opción de ver MIS peticiones.
   // Luego otra llamada para ver una petición concreta, que eso se hace por ID de la petición, en realidad
-  async getCollaborationPetition(creation_id: string): Promise<CreationCollaboration> {
-    const collaboration = await this.creationCollaborationRepository.findOne({
-      where: {
-        creation: { creation_id },
-      },
+  async getCollaborationPetition(
+    creation_collaboration_id: string,
+  ): Promise<CreationCollaboration> {
+    const collaboration = await this.creationCollaborationRepository.findOneBy({
+      creation_collaboration_id,
     });
 
     if (!collaboration)

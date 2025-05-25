@@ -28,8 +28,11 @@ export class CreationsController {
   // Solicitudes de Colaboración
   @Get('collaborations')
   @AuthenticateByAuthorOwnership()
-  getCollaborationPetition(@Query('id', ParseUUIDPipe) creation_id: string) {
-    return this.creationsService.getCollaborationPetition(creation_id);
+  getCollaborationPetition(
+    // Solo necesitamos el collaboration_petition_id, el creation_id se obtiene internamente mediante el Guard
+    @Query('collaboration_petition_id', ParseUUIDPipe) creation_collaboration_id: string,
+  ) {
+    return this.creationsService.getCollaborationPetition(creation_collaboration_id);
   }
 
   @Post('collaborations')
@@ -71,5 +74,4 @@ export class CreationsController {
   findOne(@Param('term') term: string) {
     return this.creationsService.findOne(term);
   }
-  // TODO: Buscar creaciones por Tags. Se necesita haber creado el módulo de Tags previamente
 }

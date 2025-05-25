@@ -34,7 +34,8 @@ export class AuthorGuard implements CanActivate {
     const user = request.user; // se que va a venir porque esto vendrá después del Guard de Auth, que me trae el usuario a través de su token JWT
     let roles: VALID_ROLES[] = [];
 
-    if (!creation_id) throw new InternalServerErrorException('No hay ningún ID en la request.');
+    if (!creation_id)
+      throw new InternalServerErrorException('No hay ningún ID (creation) en la request.');
 
     const creation = await this.creationRepository.findOne({
       where: { creation_id },
