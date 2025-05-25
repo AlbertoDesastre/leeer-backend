@@ -15,7 +15,7 @@ import { Creation } from './creation.entity';
 export class CreationCollaboration {
   @PrimaryGeneratedColumn('uuid')
   creation_collaboration_id: string;
-  @Column({ default: false }) // COMPROBAR SI ESTO HACE LO QUE PIENSO!!!
+  @Column({ default: null })
   approved_by_original_author: boolean;
   @Column()
   is_fanfiction: boolean;
@@ -35,7 +35,7 @@ export class CreationCollaboration {
     (user) => user.creation_collaborations, // luego, dentro de esa entidad, por qué propiedad está conectada
     { eager: true }, // esto carga automáticamente la entidad usuario con la que está relacionado, sin necesidad de hacer un leftJoin
   )
-  // He tenido que poner este JoinColumn porque en mi base de dato la columna se llama "user_id" y no "userid", que es lo que TypeORM estaba infiriendo y buscando. Como no lo encontraba en la tabla usuarios, petaba.
+  // He tenido que poner este JoinColumn porque en mi base de datos la columna se llama "user_id" y no "userid", que es lo que TypeORM estaba infiriendo y buscando. Como no lo encontraba en la tabla usuarios, petaba.
   @JoinColumn({ name: 'user_id' })
   user: User;
 

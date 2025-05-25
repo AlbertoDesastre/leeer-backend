@@ -181,7 +181,6 @@ export class CreationsService {
     }
   }
 
-  // TODO: Que este método devuelva todas las peticiones si eres el autor original y, si no, que te devuelva solo tus peticiones.
   // Comentario del dev: Este es mi método favorito porque mezcla muchas cosas y devuelve un dato bonito y entendible.
   async findAllCollaborationPetitions(
     user: User,
