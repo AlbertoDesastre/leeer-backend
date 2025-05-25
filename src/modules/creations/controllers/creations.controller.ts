@@ -22,6 +22,7 @@ import { CreateCollaborationPetitionDto } from '../dto/create-creation-collabora
 import { AuthenticateByAuthorOwnership } from '@/modules/auth/decorators/authenticate-by-author-ownership.decorator';
 import { CollaborationPaginationDto } from '@/modules/common/dto/collaborations-pagination-dto.dto';
 import { VALID_ROLES } from '@/modules/auth/interfaces/valid-roles';
+import { UpdateCreationCollaborationDto } from '../dto/update-creation-collaboration-petition.dto';
 
 @Controller('creations')
 export class CreationsController {
@@ -69,6 +70,18 @@ export class CreationsController {
       user,
       creation_id,
       createCollaborationPetitionDto,
+    );
+  }
+
+  @Patch('collaborations')
+  @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR)
+  updateCollaborationPetition(
+    @Query('collaboration_id', ParseUUIDPipe) creation_collaboration_id: string,
+    @Body() updateCreationCollaborationDto: UpdateCreationCollaborationDto,
+  ) {
+    return this.creationsService.updateCollaborationPetition(
+      creation_collaboration_id,
+      updateCreationCollaborationDto,
     );
   }
 

@@ -20,6 +20,7 @@ import { User } from '@/modules/users/entities/user.entity';
 import { CreationCollaboration } from '../entities/creation-collaboration.entity';
 import { CreateCollaborationPetitionDto } from '../dto/create-creation-collaboration-petition.dto';
 import { CollaborationPaginationDto } from '@/modules/common/dto/collaborations-pagination-dto.dto';
+import { UpdateCreationCollaborationDto } from '../dto/update-creation-collaboration-petition.dto';
 
 @Injectable()
 export class CreationsService {
@@ -249,6 +250,31 @@ export class CreationsService {
     }
 
     return collaborations;
+  }
+
+  async updateCollaborationPetition(
+    creation_collaboration_id: string,
+    updateCreationCollaborationDto: UpdateCreationCollaborationDto,
+  ): Promise<CreationCollaboration> {
+    let collaboration = await this.creationCollaborationRepository.preload({
+      creation_collaboration_id,
+      ...updateCreationCollaborationDto,
+    });
+
+    if (!collaboration)
+      // BadRequestException me lo trae de serie Nest
+      throw new BadRequestException(
+        `La petición de colaboración con id ${creation_collaboration_id} no existe y no se actualizó.`,
+      );
+
+    try {
+      await this.creationCollaborationRepository.save(collaboration);
+      return collaboration;
+    } catch (error) {
+      this.handleException(error);
+    }
+
+    return collaboration;
   }
 
   handleException(error) {
