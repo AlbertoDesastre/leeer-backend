@@ -3,7 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 
 import { VALID_ROLES } from '../interfaces/valid-roles';
 import { USER_ROLES } from './decorators.decorator';
-import { RolesGuard } from '../guards/auth.guard';
+import { RolesGuard } from '../guards/roles.guard';
 import { AuthorGuard } from '../guards/author.guard';
 
 export function AuthenticateByAuthorOwnership(...roles: VALID_ROLES[]) {
