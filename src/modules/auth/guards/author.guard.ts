@@ -55,8 +55,10 @@ export class AuthorGuard implements CanActivate {
         },
       });
 
-      if (collaboration) {
+      if (collaboration.approved_by_original_author === true) {
         roles.push(VALID_ROLES.COLLABORATOR);
+      } else {
+        roles.push(VALID_ROLES.PENDING_COLLABORATOR);
       }
     }
 

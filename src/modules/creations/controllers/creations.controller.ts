@@ -31,7 +31,11 @@ export class CreationsController {
   // Solicitudes de Colaboración
   // Este método obtiene todas las peticiones a una obra concreta
   @Get('collaborations')
-  @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR, VALID_ROLES.COLLABORATOR)
+  @AuthenticateByAuthorOwnership(
+    VALID_ROLES.ORIGINAL_AUTHOR,
+    VALID_ROLES.COLLABORATOR,
+    VALID_ROLES.PENDING_COLLABORATOR,
+  )
   getCollaborationPetition(
     // Solo necesitamos el collaboration_petition_id, el creation_id se obtiene internamente mediante el Guard
     @GetUser() user: User,
@@ -41,8 +45,14 @@ export class CreationsController {
   }
 
   // Este método encuentra todas las peticiones que haya mandado o recibido el usuario.
+  // Permito entrar a cualquier usuario que sea autor original o que por lo menos haya mandado petición. El servicio se encarga de darte solo las tuyas (o todas, en caso de ser el autor original)
+  // Si no eres ni autor ni has mandado petición se entiende que no pintas nada en este método.
   @Get('collaborations/all')
-  @Authenticate()
+  @AuthenticateByAuthorOwnership(
+    VALID_ROLES.ORIGINAL_AUTHOR,
+    VALID_ROLES.COLLABORATOR,
+    VALID_ROLES.PENDING_COLLABORATOR,
+  )
   findAllCollaborationPetitions(@GetUser() user: User, @Query() paginationDto: PaginationDto) {
     return this.creationsService.findAllCollaborationPetitions(user, paginationDto);
   }
