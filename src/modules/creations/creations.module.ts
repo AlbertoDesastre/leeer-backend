@@ -9,11 +9,12 @@ import { Creation } from './entities/creation.entity';
 import { User } from '../users/entities/user.entity';
 import { AuthModule } from '../auth/auth.module';
 import { CreationCollaboration } from './entities/creation-collaboration.entity';
+import { Part } from '../parts/entities/part.entity';
 
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([User, Creation, CreationCollaboration]),
+    TypeOrmModule.forFeature([User, Creation, CreationCollaboration, Part]),
     AuthModule,
   ],
   controllers: [CreationsController],

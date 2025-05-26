@@ -1,4 +1,3 @@
-import { User } from '@/modules/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
@@ -9,8 +8,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { CreationCollaboration } from './creation-collaboration.entity';
 
+import { User } from '@/modules/users/entities/user.entity';
+import { Part } from '@/modules/parts/entities/part.entity';
+import { CreationCollaboration } from './creation-collaboration.entity';
 /* @Entity marca la tabla real de la BD "creations" para hacer las transacciones. El resto de decoradores son autodefinitorios. */
 @Entity('creations')
 export class Creation {
@@ -46,4 +47,8 @@ export class Creation {
   @OneToMany(() => CreationCollaboration, (creationCollaboration) => creationCollaboration.creation)
   @JoinColumn({ name: 'creation_collaboration_id' })
   creation_collaborations?: CreationCollaboration[];
+
+  @OneToMany(() => Part, (part) => part.creation)
+  @JoinColumn({ name: 'part_id' })
+  parts?: Part[];
 }
