@@ -55,8 +55,14 @@ export class AuthorGuard implements CanActivate {
         },
       });
 
+      if (!collaboration)
+        throw new ForbiddenException(
+          'No puedes acceder a este recurso (falta de permisos de colaboración).',
+        );
+
       if (collaboration.approved_by_original_author === true) {
         roles.push(VALID_ROLES.COLLABORATOR);
+        console.log('collab');
       } else {
         roles.push(VALID_ROLES.PENDING_COLLABORATOR);
       }

@@ -1,12 +1,16 @@
-import { IsUUID, IsString, MinLength, IsBoolean, IsOptional } from 'class-validator';
+import { IsUUID, IsString, IsBoolean, IsOptional, MaxLength } from 'class-validator';
 
 export class CreatePartDto {
   @IsUUID()
   creation_id: string;
   @IsString()
+  @MaxLength(100)
+  title: string;
+  @IsString()
   readonly content: string;
   @IsBoolean()
-  readonly isDraft: boolean;
+  @IsOptional()
+  readonly isDraft: boolean | null;
   @IsString()
   @IsOptional()
   readonly thumbnail?: string;

@@ -15,6 +15,8 @@ import {
 export class Part {
   @PrimaryGeneratedColumn('uuid')
   part_id: string;
+  @Column('varchar', { length: 100 })
+  title: string;
   @Column({ type: 'mediumtext' })
   content: string;
   @Column({ type: 'int' })
