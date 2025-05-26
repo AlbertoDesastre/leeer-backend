@@ -16,7 +16,7 @@ export class CreationCollaboration {
   @PrimaryGeneratedColumn('uuid')
   creation_collaboration_id: string;
   @Column({ default: null })
-  approved_by_original_author: boolean;
+  approved_by_original_author: boolean | null;
   @Column()
   is_fanfiction: boolean;
   @Column()
