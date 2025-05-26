@@ -173,10 +173,10 @@ export class CreationsService {
       creation,
       ...createCollaborationPetitionDto,
     });
-    console.log(creationCollab);
+
     try {
       const a = await this.creationCollaborationRepository.save(creationCollab);
-      console.log(a);
+
       return { creation, creationCollab };
     } catch (error) {
       console.log(error);
