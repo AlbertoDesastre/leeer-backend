@@ -55,7 +55,9 @@ export class PartsService {
   }
 
   async findOne(creation_id: string, id: string): Promise<Part> {
-    let part: Part;
+    const part: Part = await this.partRepository.findOneBy({ part_id: id, is_draft: false });
+
+    if (!part) throw new NotFoundException('No hay ninguna parte que aplique a tu búsqueda.');
 
     return part;
   }

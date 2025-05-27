@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { PartsService } from './parts.service';
 import { CreatePartDto } from './dto/create-part.dto';
 
@@ -28,8 +38,7 @@ export class PartsController {
 
   // Método por empezar, dejo hasta aquí
   @Get('get-only') // ¡Esta ruta debe ir al final siempre, porque hace mathing dinámico con cualquier cosa! Las rutas específicas, en Nest, van siempre lo más arriba posible.
-  findOne(@Param('creation_id') creation_id: string, @Query('id') id: string) {
-    console.log(creation_id, id);
+  findOne(@Param('creation_id') creation_id: string, @Query('id', ParseUUIDPipe) id: string) {
     return this.partsService.findOne(creation_id, id);
   }
 }
