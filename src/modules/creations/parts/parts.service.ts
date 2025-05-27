@@ -54,15 +54,37 @@ export class PartsService {
     }
   }
 
-  async findOne(creation_id: string, id: string): Promise<Part> {
-    const part: Part = await this.partRepository.findOneBy({ part_id: id, is_draft: false });
+  async findOne({
+    creation_id,
+    id,
+    showDrafts,
+  }: {
+    creation_id: string;
+    id: string;
+    showDrafts: boolean;
+  }): Promise<Part> {
+    const condition = showDrafts
+      ? { creation: { creation_id }, part_id: id }
+      : { creation: { creation_id }, part_id: id, is_draft: false };
+
+    const part: Part = await this.partRepository.findOne({
+      where: condition,
+    });
 
     if (!part) throw new NotFoundException('No hay ninguna parte que aplique a tu búsqueda.');
 
     return part;
   }
 
-  async findAll(creation_id: string, paginationDto: PaginationDto) {
+  async findAll({
+    creation_id,
+    paginationDto,
+    showDrafts,
+  }: {
+    creation_id: string;
+    paginationDto: PaginationDto;
+    showDrafts: boolean;
+  }) {
     const { limit = this.paginationLimit, offset = 0 } = paginationDto;
 
     if (!creation_id)
@@ -72,8 +94,15 @@ export class PartsService {
 
     if (!creation) throw new NotFoundException('No se han encontrado creaciones.');
 
+    // showDrafts solo se activa en las rutas para autores.
+    const condition = showDrafts
+      ? { creation: { creation_id } }
+      : { creation: { creation_id }, is_draft: false };
+
     const parts = this.partRepository.find({
-      where: { creation: { creation_id }, is_draft: false },
+      where: condition,
+      take: limit,
+      skip: offset,
     });
 
     return parts;

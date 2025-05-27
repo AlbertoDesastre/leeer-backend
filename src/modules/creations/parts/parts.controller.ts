@@ -33,12 +33,23 @@ export class PartsController {
   // este método es público a propósito, para que todos los lectores puedan leer las partes publicadas.
   @Get()
   findAll(@Param('creation_id') creation_id: string, @Query() paginationDto: PaginationDto) {
-    return this.partsService.findAll(creation_id, paginationDto);
+    return this.partsService.findAll({ creation_id, paginationDto, showDrafts: false });
   }
 
-  // Método por empezar, dejo hasta aquí
-  @Get('get-only') // ¡Esta ruta debe ir al final siempre, porque hace mathing dinámico con cualquier cosa! Las rutas específicas, en Nest, van siempre lo más arriba posible.
+  @Get('author')
+  @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR, VALID_ROLES.COLLABORATOR)
+  findAllMyParts(@Param('creation_id') creation_id: string, @Query() paginationDto: PaginationDto) {
+    return this.partsService.findAll({ creation_id, paginationDto, showDrafts: true });
+  }
+
+  @Get('get-only')
   findOne(@Param('creation_id') creation_id: string, @Query('id', ParseUUIDPipe) id: string) {
-    return this.partsService.findOne(creation_id, id);
+    return this.partsService.findOne({ creation_id, id, showDrafts: false });
+  }
+
+  @Get('author/get-only')
+  @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR, VALID_ROLES.COLLABORATOR)
+  findMyPart(@Param('creation_id') creation_id: string, @Query('id', ParseUUIDPipe) id: string) {
+    return this.partsService.findOne({ creation_id, id, showDrafts: true });
   }
 }
