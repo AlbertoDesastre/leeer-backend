@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
-import { UsersService } from './services/users.service';
-import { UsersController } from './controllers/users.controller';
+import { UsersService } from './users.service';
+import { UsersController } from './users.controller';
 import { User } from './entities/user.entity';
 
 import { Creation } from '../creations/entities/creation.entity';
-import { CreationCollaboration } from '../creations/entities/creation-collaboration.entity';
+import { CreationCollaboration } from '../creations/collaborations/entities/creation-collaboration.entity';
 import { Part } from '../creations/parts/entities/part.entity';
 
 @Module({

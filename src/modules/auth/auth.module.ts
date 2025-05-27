@@ -9,7 +9,7 @@ import { AuthService } from '@/modules/auth/services/auth.service';
 import { AuthController } from './controllers/auth.controller';
 import { User } from '../users/entities/user.entity';
 import { Creation } from '../creations/entities/creation.entity';
-import { CreationCollaboration } from '../creations/entities/creation-collaboration.entity';
+import { CreationCollaboration } from '../creations/collaborations/entities/creation-collaboration.entity';
 
 @Module({
   imports: [

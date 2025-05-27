@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
-import { PartsService } from '../services/parts.service';
-import { CreatePartDto } from '../dto/create-part.dto';
+import { PartsService } from './parts.service';
+import { CreatePartDto } from './dto/create-part.dto';
 
 import { AuthenticateByAuthorOwnership } from '@/modules/auth/decorators/authenticate-by-author-ownership.decorator';
 import { VALID_ROLES } from '@/modules/auth/interfaces/valid-roles';
@@ -8,7 +8,7 @@ import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 import { User } from '@/modules/users/entities/user.entity';
 
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
-import { PartAndCreationPaginationDto } from '../dto/part-and-creation-pagination-dto';
+import { PartAndCreationPaginationDto } from './dto/part-and-creation-pagination-dto';
 
 @Controller('/creations/:creation_id/parts')
 export class PartsController {

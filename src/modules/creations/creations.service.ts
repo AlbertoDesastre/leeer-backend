@@ -16,7 +16,7 @@ import { Creation } from '@/modules/creations/entities/creation.entity';
 
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 import { User } from '@/modules/users/entities/user.entity';
-import { CreationCollaboration } from '../entities/creation-collaboration.entity';
+import { CreationCollaboration } from './collaborations/entities/creation-collaboration.entity';
 
 @Injectable()
 export class CreationsService {

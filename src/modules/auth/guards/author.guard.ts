@@ -7,14 +7,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Observable } from 'rxjs';
 import { Repository } from 'typeorm';
 
-import { USER_ROLES } from '../decorators/decorators.decorator';
 import { Creation } from '@/modules/creations/entities/creation.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '@/modules/users/entities/user.entity';
-import { CreationCollaboration } from '@/modules/creations/entities/creation-collaboration.entity';
+
+import { CreationCollaboration } from '@/modules/creations/collaborations/entities/creation-collaboration.entity';
 import { VALID_ROLES } from '../interfaces/valid-roles';
 
 @Injectable()

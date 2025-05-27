@@ -1,4 +1,4 @@
-import { CreationCollaboration } from '@/modules/creations/entities/creation-collaboration.entity';
+import { CreationCollaboration } from '@/modules/creations/collaborations/entities/creation-collaboration.entity';
 import { Creation } from '@/modules/creations/entities/creation.entity';
 import { Part } from '@/modules/creations/parts/entities/part.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';

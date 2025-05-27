@@ -1,7 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  ForbiddenException,
   BadRequestException,
   InternalServerErrorException,
   Logger,
@@ -9,17 +8,14 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { CreatePartDto } from '../dto/create-part.dto';
-import { UpdatePartDto } from '../dto/update-part.dto';
-
-import { Part } from '../entities/part.entity';
-import { Creation } from '@/modules/creations/entities/creation.entity';
 import { User } from '@/modules/users/entities/user.entity';
-import { CreationsService } from '@/modules/creations/services/creations.service';
+import { CreationsService } from '@/modules/creations/creations.service';
 import { ConfigService } from '@nestjs/config';
-import { PartAndCreationPaginationDto } from '../dto/part-and-creation-pagination-dto';
-import { CreationCollaboration } from '@/modules/creations/entities/creation-collaboration.entity';
+
+import { CreationCollaboration } from '../collaborations/entities/creation-collaboration.entity';
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
+import { CreatePartDto } from './dto/create-part.dto';
+import { Part } from './entities/part.entity';
 
 @Injectable()
 export class PartsService {

@@ -2,11 +2,11 @@ import { User } from '@/modules/users/entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { usersSeed } from '../data';
+import { usersSeed } from './data';
 import { CreateCreationDto } from '@/modules/creations/dto/create-creation.dto';
 import { Creation } from '@/modules/creations/entities/creation.entity';
-import { CreationsService } from '@/modules/creations/services/creations.service';
-import { UsersService } from '@/modules/users/services/users.service';
+import { CreationsService } from '@/modules/creations/creations.service';
+
 import { AuthService } from '@/modules/auth/services/auth.service';
 import { CreateCollaborationPetitionDto } from '@/modules/creations/dto/create-creation-collaboration-petition.dto';
 import { CollaborationsService } from '@/modules/creations/collaborations/collaborations.service';

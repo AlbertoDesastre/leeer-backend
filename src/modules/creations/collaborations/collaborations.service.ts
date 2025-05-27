@@ -14,11 +14,11 @@ import { Creation } from '@/modules/creations/entities/creation.entity';
 
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 import { User } from '@/modules/users/entities/user.entity';
-import { CreationCollaboration } from '../entities/creation-collaboration.entity';
+
+import { CreationCollaboration } from './entities/creation-collaboration.entity';
 import { CreateCollaborationPetitionDto } from '../dto/create-creation-collaboration-petition.dto';
-import { CollaborationPaginationDto } from '@/modules/common/dto/collaborations-pagination-dto.dto';
 import { UpdateCreationCollaborationDto } from '../dto/update-creation-collaboration-petition.dto';
-import { CreationsService } from '../services/creations.service';
+import { CreationsService } from '../creations.service';
 
 @Injectable()
 export class CollaborationsService {

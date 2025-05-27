@@ -10,7 +10,7 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 
-import { CreationsService } from '@/modules/creations/services/creations.service';
+import { CreationsService } from '@/modules/creations/creations.service';
 import { CreateCreationDto } from '@/modules/creations/dto/create-creation.dto';
 import { UpdateCreationDto } from '@/modules/creations/dto/update-creation.dto';
 

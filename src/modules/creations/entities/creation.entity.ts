@@ -11,7 +11,8 @@ import {
 
 import { User } from '@/modules/users/entities/user.entity';
 import { Part } from '@/modules/creations/parts/entities/part.entity';
-import { CreationCollaboration } from './creation-collaboration.entity';
+import { CreationCollaboration } from '../collaborations/entities/creation-collaboration.entity';
+
 /* @Entity marca la tabla real de la BD "creations" para hacer las transacciones. El resto de decoradores son autodefinitorios. */
 @Entity('creations')
 export class Creation {

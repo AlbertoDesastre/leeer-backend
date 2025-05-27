@@ -7,11 +7,11 @@ import { AuthModule } from '@/modules/auth/auth.module';
 
 import { Part } from '../parts/entities/part.entity';
 import { User } from '@/modules/users/entities/user.entity';
-import { CreationCollaboration } from '../entities/creation-collaboration.entity';
 import { Creation } from '../entities/creation.entity';
+import { CreationCollaboration } from './entities/creation-collaboration.entity';
 import { CollaborationsController } from './collaborations.controller';
 import { CollaborationsService } from './collaborations.service';
-import { CreationsService } from '../services/creations.service';
+import { CreationsService } from '../creations.service';
 
 @Module({
   imports: [

@@ -9,14 +9,13 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 
-import { CreateUserDto } from '../dto/create-user.dto';
-import { UpdateUserDto } from '../dto/update-user.dto';
-import { User } from '../entities/user.entity';
-
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 
 import { validate as isUuid } from 'uuid';
 import { Creation } from '@/modules/creations/entities/creation.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
