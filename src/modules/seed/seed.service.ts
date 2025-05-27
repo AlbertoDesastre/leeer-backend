@@ -10,6 +10,8 @@ import { CreationsService } from '@/modules/creations/creations.service';
 import { AuthService } from '@/modules/auth/services/auth.service';
 import { CreateCollaborationPetitionDto } from '@/modules/creations/dto/create-creation-collaboration-petition.dto';
 import { CollaborationsService } from '@/modules/creations/collaborations/collaborations.service';
+import { PartsService } from '../creations/parts/parts.service';
+import { CreatePartDto } from '../creations/parts/dto/create-part.dto';
 
 @Injectable()
 export class SeedService {
@@ -19,6 +21,7 @@ export class SeedService {
     private readonly authService: AuthService,
     private readonly creationService: CreationsService,
     private readonly collaborationService: CollaborationsService,
+    private readonly partService: PartsService,
   ) {}
 
   // Utilizo los servicios en vez de los repositorios para insertar porque hay ciertas lógicas como encriptar las contraseñas qeu solo están disponibles ahí.
@@ -50,6 +53,7 @@ export class SeedService {
     }
 
     await this.findAndCreateCollabPetitions();
+    await this.createPartsForCreations();
 
     return 'Datos insertados en BD.';
   }
@@ -86,10 +90,42 @@ export class SeedService {
     }
   }
 
+  async createPartsForCreations() {
+    const users = await this.userRepository.find();
+
+    // esta operación se hace para cada usuario.
+    for (const user of users) {
+      // agarro todas las creaciones
+
+      const creations = await this.creationRepository.find({
+        where: { user },
+      });
+
+      // y a cada creación le añado una parte escrita por su autor original
+      for (const creation of creations) {
+        for (let i = 1; i <= 3; i++) {
+          const createPartDto: CreatePartDto = {
+            creation_id: creation.creation_id,
+            title: `Parte ${i} de "${creation.title}"`,
+            content: `Contenido ficticio de la parte ${i} escrita por ${user.nickname}.`,
+            isDraft: !!Math.round(Math.random()), // boolean aleatorio
+            thumbnail: `https://example.com/thumbnails/${user.nickname.toLowerCase()}-${i}.jpg`,
+          };
+
+          try {
+            await this.partService.create(user, createPartDto);
+          } catch (error) {
+            console.log(error);
+          }
+        }
+      }
+    }
+  }
+
   async deleteAllData() {
     await this.userRepository.deleteAll();
     await this.creationRepository.deleteAll();
-    // no hace falta deletear las colaboraciones porque "Creation" tiene borrado en cascada
+    // no hace falta deletear las colaboraciones ni partes porque "Creation" tiene borrado en cascada
 
     console.log('Se eliminó toda la data antes de ejecutar el seed.');
   }

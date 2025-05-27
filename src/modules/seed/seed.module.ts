@@ -16,18 +16,22 @@ import { CollaborationsModule } from '../creations/collaborations/collaborations
 
 import { SeedService } from './seed.service';
 import { SeedController } from './seed.controller';
+import { PartsService } from '../creations/parts/parts.service';
+import { PartsModule } from '../creations/parts/parts.module';
+import { Part } from '../creations/parts/entities/part.entity';
 
 @Module({
   imports: [
     ConfigModule,
     AuthModule,
     PassportModule,
-    TypeOrmModule.forFeature([User, Creation, CreationCollaboration]),
+    TypeOrmModule.forFeature([User, Creation, CreationCollaboration, Part]),
     CreationsModule,
     CollaborationsModule,
+    PartsModule,
   ],
   controllers: [SeedController],
-  providers: [SeedService, CreationsService, AuthService, CollaborationsService],
+  providers: [SeedService, CreationsService, AuthService, CollaborationsService, PartsService],
   exports: [],
 })
 export class SeedModule {}
