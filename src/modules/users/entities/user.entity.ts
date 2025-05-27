@@ -1,5 +1,6 @@
-import { CreationCollaboration } from '@/modules/creations/entities/creation-collaboration.entity';
+import { CreationCollaboration } from '@/modules/creations/collaborations/entities/creation-collaboration.entity';
 import { Creation } from '@/modules/creations/entities/creation.entity';
+import { Part } from '@/modules/creations/parts/entities/part.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 /* @Entity marca la tabla real de la BD "users" para hacer las transacciones. El resto de decoradores son autodefinitorios. */
@@ -30,4 +31,13 @@ export class User {
     cascade: true,
   })
   creation_collaborations?: CreationCollaboration[];
+
+  @OneToMany(
+    () => Part, // entidad objetivo
+    (part) => part.user, // por qué propiedad está conectada
+    {
+      cascade: true,
+    },
+  )
+  parts?: Part[];
 }

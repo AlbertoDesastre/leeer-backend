@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Creation } from './creation.entity';
+import { Creation } from '../../entities/creation.entity';
 
 /* @Entity marca la tabla real de la BD "creations" para hacer las transacciones. El resto de decoradores son autodefinitorios. */
 @Entity('creation_collaborations')
@@ -16,7 +16,7 @@ export class CreationCollaboration {
   @PrimaryGeneratedColumn('uuid')
   creation_collaboration_id: string;
   @Column({ default: null })
-  approved_by_original_author: boolean;
+  approved_by_original_author: boolean | null;
   @Column()
   is_fanfiction: boolean;
   @Column()
