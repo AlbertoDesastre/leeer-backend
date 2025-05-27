@@ -8,7 +8,6 @@ import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 import { User } from '@/modules/users/entities/user.entity';
 
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
-import { PartAndCreationPaginationDto } from './dto/part-and-creation-pagination-dto';
 
 @Controller('/creations/:creation_id/parts')
 export class PartsController {
@@ -23,7 +22,14 @@ export class PartsController {
 
   // este método es público a propósito, para que todos los lectores puedan leer las partes publicadas.
   @Get()
-  findAll(@Param('creation_id') creation_id, @Query() paginationDto: PaginationDto) {
+  findAll(@Param('creation_id') creation_id: string, @Query() paginationDto: PaginationDto) {
     return this.partsService.findAll(creation_id, paginationDto);
+  }
+
+  // Método por empezar, dejo hasta aquí
+  @Get('get-only') // ¡Esta ruta debe ir al final siempre, porque hace mathing dinámico con cualquier cosa! Las rutas específicas, en Nest, van siempre lo más arriba posible.
+  findOne(@Param('creation_id') creation_id: string, @Query('id') id: string) {
+    console.log(creation_id, id);
+    return this.partsService.findOne(creation_id, id);
   }
 }

@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { validate as isUuid } from 'uuid';
 
 import { User } from '@/modules/users/entities/user.entity';
 import { CreationsService } from '@/modules/creations/creations.service';
@@ -51,6 +52,12 @@ export class PartsService {
     } catch (error) {
       this.handleException(error);
     }
+  }
+
+  async findOne(creation_id: string, id: string): Promise<Part> {
+    let part: Part;
+
+    return part;
   }
 
   async findAll(creation_id: string, paginationDto: PaginationDto) {
