@@ -17,6 +17,8 @@ import { CreationCollaboration } from '../collaborations/entities/creation-colla
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 import { CreatePartDto } from './dto/create-part.dto';
 import { Part } from './entities/part.entity';
+import { UpdatePartDto } from './dto/update-part.dto';
+import { Creation } from '../entities/creation.entity';
 
 @Injectable()
 export class PartsService {
@@ -34,8 +36,8 @@ export class PartsService {
     this.paginationLimit = this.configService.get<number>('paginationLimit');
   }
 
-  async create(user: User, createPartDto: CreatePartDto): Promise<Part> {
-    const { creation_id } = createPartDto;
+  async create(user: User, creat: Creation, createPartDto: CreatePartDto): Promise<Part> {
+    const { creation_id } = creat;
 
     const creation = await this.creationService.findOne(creation_id); // esto ya tira error si no lo encuentra
     // Como ya hago la comprobación de si es colaborador o autor en el Guard me puedo ahorrar una verificación de user_id <3
@@ -54,13 +56,37 @@ export class PartsService {
     }
   }
 
-  async findOne(creation_id: string, id: string): Promise<Part> {
-    let part: Part;
+  async findOne({
+    creation_id,
+    id,
+    showDrafts,
+  }: {
+    creation_id: string;
+    id: string;
+    showDrafts: boolean;
+  }): Promise<Part> {
+    const condition = showDrafts
+      ? { creation: { creation_id }, part_id: id }
+      : { creation: { creation_id }, part_id: id, is_draft: false };
+
+    const part: Part = await this.partRepository.findOne({
+      where: condition,
+    });
+
+    if (!part) throw new NotFoundException('No hay ninguna parte que aplique a tu búsqueda.');
 
     return part;
   }
 
-  async findAll(creation_id: string, paginationDto: PaginationDto) {
+  async findAll({
+    creation_id,
+    paginationDto,
+    showDrafts,
+  }: {
+    creation_id: string;
+    paginationDto: PaginationDto;
+    showDrafts: boolean;
+  }) {
     const { limit = this.paginationLimit, offset = 0 } = paginationDto;
 
     if (!creation_id)
@@ -70,11 +96,48 @@ export class PartsService {
 
     if (!creation) throw new NotFoundException('No se han encontrado creaciones.');
 
+    // showDrafts solo se activa en las rutas para autores.
+    const condition = showDrafts
+      ? { creation: { creation_id } }
+      : { creation: { creation_id }, is_draft: false };
+
     const parts = this.partRepository.find({
-      where: { creation: { creation_id }, is_draft: false },
+      where: condition,
+      take: limit,
+      skip: offset,
     });
 
     return parts;
+  }
+
+  async update(id: string, updateCreationDto: UpdatePartDto) {
+    const part = await this.partRepository.preload({
+      part_id: id,
+      is_draft: updateCreationDto.isDraft,
+      ...updateCreationDto,
+    }); // Precarga una entidad de la base de datos en base a su llave primaria. Si no encontró nada entonces la instancia creada estará vacía.
+
+    if (!part) throw new BadRequestException(`La parte con id ${id} no existe y no se actualizó.`);
+
+    try {
+      await this.partRepository.save(part);
+      return part;
+    } catch (error) {
+      this.handleException(error);
+    }
+  }
+
+  async remove(creation_id: string, id: string) {
+    const part = await this.findOne({ creation_id, id, showDrafts: true }); // si no encuentra a creación este método ya tira Exception
+
+    try {
+      await this.partRepository.delete(part); // esta operación ni siquiera checkea si existe a creación en DB así que hay que hacer una comprobación manual
+      return `La creación con id ${id} fue eliminado.`;
+    } catch (error) {
+      this.handleException(error);
+    }
+
+    return `La parte con ${id} fue borrada con éxito`;
   }
 
   handleException(error) {

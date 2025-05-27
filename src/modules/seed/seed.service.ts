@@ -12,12 +12,14 @@ import { CreateCollaborationPetitionDto } from '@/modules/creations/dto/create-c
 import { CollaborationsService } from '@/modules/creations/collaborations/collaborations.service';
 import { PartsService } from '../creations/parts/parts.service';
 import { CreatePartDto } from '../creations/parts/dto/create-part.dto';
+import { Part } from '../creations/parts/entities/part.entity';
 
 @Injectable()
 export class SeedService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Creation) private readonly creationRepository: Repository<Creation>,
+    @InjectRepository(Part) private readonly partRepository: Repository<Part>,
     private readonly authService: AuthService,
     private readonly creationService: CreationsService,
     private readonly collaborationService: CollaborationsService,
@@ -105,15 +107,21 @@ export class SeedService {
       for (const creation of creations) {
         for (let i = 1; i <= 3; i++) {
           const createPartDto: CreatePartDto = {
-            creation_id: creation.creation_id,
             title: `Parte ${i} de "${creation.title}"`,
             content: `Contenido ficticio de la parte ${i} escrita por ${user.nickname}.`,
             isDraft: !!Math.round(Math.random()), // boolean aleatorio
             thumbnail: `https://example.com/thumbnails/${user.nickname.toLowerCase()}-${i}.jpg`,
           };
 
+          // Me ha dejado de servir el servicio porque para obtener la creation necesita estar en la request. A partir de ahora lo hago
+          const part = this.partRepository.create({
+            ...createPartDto,
+            creation,
+            user,
+          });
+
           try {
-            await this.partService.create(user, createPartDto);
+            await this.partRepository.save(part);
           } catch (error) {
             console.log(error);
           }
