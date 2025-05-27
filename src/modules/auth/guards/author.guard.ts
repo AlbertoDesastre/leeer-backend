@@ -30,7 +30,7 @@ export class AuthorGuard implements CanActivate {
   // reflector permite leer cualquier metadata que haya sido incluida a través de los decorators, se hace pasándole el nombre del metadato más el contexto. Fuente: https://docs.nestjs.com/fundamentals/execution-context#reflection-and-metadata
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const creation_id = request.query.id as string;
+    const { creation_id } = request.params as { creation_id: string };
     const user = request.user; // se que va a venir porque esto vendrá después del Guard de Auth, que me trae el usuario a través de su token JWT
     let roles: VALID_ROLES[] = [];
 
@@ -48,6 +48,7 @@ export class AuthorGuard implements CanActivate {
       roles.push(VALID_ROLES.ORIGINAL_AUTHOR, VALID_ROLES.COLLABORATOR);
     } else {
       // Si no es autor original se verifica si al menos es colaborador
+
       const collaboration = await this.creationCollaborationRepository.findOne({
         where: {
           creation: { creation_id },
@@ -75,6 +76,12 @@ export class AuthorGuard implements CanActivate {
       );
     }
 
+    // Elimino toda la data sobrante. TODO = Desactivar el eager relations para evitar estas cosas.
+    delete creation.user;
+    delete creation.parts;
+    delete creation.creation_collaborations;
+
+    request.creation = creation;
     request.user.roles = roles;
 
     return true;

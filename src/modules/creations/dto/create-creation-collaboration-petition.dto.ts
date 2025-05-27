@@ -1,8 +1,9 @@
 import { Transform } from 'class-transformer';
-import { IsBoolean } from 'class-validator';
+import { IsBoolean, IsOptional } from 'class-validator';
 
 export class CreateCollaborationPetitionDto {
   @IsBoolean()
+  @IsOptional()
   @Transform(() => null) // me da igual lo que reciba porque siempre será NULL, pendiente de aprobación
   readonly approved_by_original_author: boolean | null;
   @IsBoolean()
