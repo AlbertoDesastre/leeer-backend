@@ -18,6 +18,9 @@ import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 import { User } from '@/modules/users/entities/user.entity';
 
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
+import { GetCreation } from '../decorators/get-creation.decorator';
+import { Creation } from '../entities/creation.entity';
+import { UpdatePartDto } from './dto/update-part.dto';
 
 @Controller('/creations/:creation_id/parts')
 export class PartsController {
@@ -28,6 +31,11 @@ export class PartsController {
   @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR, VALID_ROLES.COLLABORATOR)
   create(@GetUser() user: User, @Body() createPartDto: CreatePartDto) {
     return this.partsService.create(user, createPartDto);
+  }
+
+  @Patch(':id')
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateCreationDto: UpdatePartDto) {
+    return this.partsService.update(id, updateCreationDto);
   }
 
   // este método es público a propósito, para que todos los lectores puedan leer las partes publicadas.
@@ -51,5 +59,12 @@ export class PartsController {
   @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR, VALID_ROLES.COLLABORATOR)
   findMyPart(@Param('creation_id') creation_id: string, @Query('id', ParseUUIDPipe) id: string) {
     return this.partsService.findOne({ creation_id, id, showDrafts: true });
+  }
+
+  @Delete(':id')
+  @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR)
+  remove(@GetCreation() creation: Creation, @Param('id', ParseUUIDPipe) id: string) {
+    console.log(creation, id);
+    return this.partsService.remove(creation.creation_id, id);
   }
 }

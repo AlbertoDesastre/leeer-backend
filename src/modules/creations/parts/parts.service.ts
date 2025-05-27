@@ -17,6 +17,7 @@ import { CreationCollaboration } from '../collaborations/entities/creation-colla
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 import { CreatePartDto } from './dto/create-part.dto';
 import { Part } from './entities/part.entity';
+import { UpdatePartDto } from './dto/update-part.dto';
 
 @Injectable()
 export class PartsService {
@@ -106,6 +107,36 @@ export class PartsService {
     });
 
     return parts;
+  }
+
+  async update(id: string, updateCreationDto: UpdatePartDto) {
+    const part = await this.partRepository.preload({
+      part_id: id,
+      is_draft: updateCreationDto.isDraft,
+      ...updateCreationDto,
+    }); // Precarga una entidad de la base de datos en base a su llave primaria. Si no encontró nada entonces la instancia creada estará vacía.
+
+    if (!part) throw new BadRequestException(`La parte con id ${id} no existe y no se actualizó.`);
+
+    try {
+      await this.partRepository.save(part);
+      return part;
+    } catch (error) {
+      this.handleException(error);
+    }
+  }
+
+  async remove(creation_id: string, id: string) {
+    const part = await this.findOne({ creation_id, id, showDrafts: true }); // si no encuentra a creación este método ya tira Exception
+
+    try {
+      await this.partRepository.delete(part); // esta operación ni siquiera checkea si existe a creación en DB así que hay que hacer una comprobación manual
+      return `La creación con id ${id} fue eliminado.`;
+    } catch (error) {
+      this.handleException(error);
+    }
+
+    return `La parte con ${id} fue borrada con éxito`;
   }
 
   handleException(error) {
