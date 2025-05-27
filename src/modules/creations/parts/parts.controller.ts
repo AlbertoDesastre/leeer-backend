@@ -29,8 +29,12 @@ export class PartsController {
   @Post()
   // por supuesto que el creador de la obra puede añadir partes, pero también los colaboradores aprobados por él/ella
   @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR, VALID_ROLES.COLLABORATOR)
-  create(@GetUser() user: User, @Body() createPartDto: CreatePartDto) {
-    return this.partsService.create(user, createPartDto);
+  create(
+    @GetUser() user: User,
+    @GetCreation() creat: Creation,
+    @Body() createPartDto: CreatePartDto,
+  ) {
+    return this.partsService.create(user, creat, createPartDto);
   }
 
   @Patch(':id')
@@ -64,7 +68,6 @@ export class PartsController {
   @Delete(':id')
   @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR)
   remove(@GetCreation() creation: Creation, @Param('id', ParseUUIDPipe) id: string) {
-    console.log(creation, id);
     return this.partsService.remove(creation.creation_id, id);
   }
 }

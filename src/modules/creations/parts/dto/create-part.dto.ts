@@ -1,8 +1,6 @@
 import { IsUUID, IsString, IsBoolean, IsOptional, MaxLength } from 'class-validator';
 
 export class CreatePartDto {
-  @IsUUID()
-  creation_id: string;
   @IsString()
   @MaxLength(100)
   title: string;

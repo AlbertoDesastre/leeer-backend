@@ -18,6 +18,7 @@ import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 import { CreatePartDto } from './dto/create-part.dto';
 import { Part } from './entities/part.entity';
 import { UpdatePartDto } from './dto/update-part.dto';
+import { Creation } from '../entities/creation.entity';
 
 @Injectable()
 export class PartsService {
@@ -35,8 +36,8 @@ export class PartsService {
     this.paginationLimit = this.configService.get<number>('paginationLimit');
   }
 
-  async create(user: User, createPartDto: CreatePartDto): Promise<Part> {
-    const { creation_id } = createPartDto;
+  async create(user: User, creat: Creation, createPartDto: CreatePartDto): Promise<Part> {
+    const { creation_id } = creat;
 
     const creation = await this.creationService.findOne(creation_id); // esto ya tira error si no lo encuentra
     // Como ya hago la comprobación de si es colaborador o autor en el Guard me puedo ahorrar una verificación de user_id <3
