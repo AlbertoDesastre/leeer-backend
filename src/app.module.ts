@@ -10,7 +10,7 @@ import { CommonModule } from './modules/common/common.module';
 import { CreationsModule } from './modules/creations/creations.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { SeedModule } from './modules/seed/seed.module';
-import { PartsModule } from './modules/parts/parts.module';
+import { PartsModule } from './modules/creations/parts/parts.module';
 
 @Module({
   imports: [

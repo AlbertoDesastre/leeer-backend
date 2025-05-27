@@ -19,6 +19,7 @@ import { CreationsService } from '@/modules/creations/services/creations.service
 import { ConfigService } from '@nestjs/config';
 import { PartAndCreationPaginationDto } from '../dto/part-and-creation-pagination-dto';
 import { CreationCollaboration } from '@/modules/creations/entities/creation-collaboration.entity';
+import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 
 @Injectable()
 export class PartsService {
@@ -56,8 +57,8 @@ export class PartsService {
     }
   }
 
-  async findAll(partAndCreationPaginationDto: PartAndCreationPaginationDto) {
-    const { creation_id, limit = this.paginationLimit, offset = 0 } = partAndCreationPaginationDto;
+  async findAll(creation_id: string, paginationDto: PaginationDto) {
+    const { limit = this.paginationLimit, offset = 0 } = paginationDto;
 
     if (!creation_id)
       throw new BadRequestException('No pasaste el ID de la creation que estás buscando.');

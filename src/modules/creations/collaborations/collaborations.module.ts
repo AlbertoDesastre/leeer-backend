@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CreationsModule } from '../creations.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 
-import { Part } from '@/modules/parts/entities/part.entity';
+import { Part } from '../parts/entities/part.entity';
 import { User } from '@/modules/users/entities/user.entity';
 import { CreationCollaboration } from '../entities/creation-collaboration.entity';
 import { Creation } from '../entities/creation.entity';

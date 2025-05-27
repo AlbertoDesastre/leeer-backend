@@ -1,6 +1,6 @@
 import { CreationCollaboration } from '@/modules/creations/entities/creation-collaboration.entity';
 import { Creation } from '@/modules/creations/entities/creation.entity';
-import { Part } from '@/modules/parts/entities/part.entity';
+import { Part } from '@/modules/creations/parts/entities/part.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 /* @Entity marca la tabla real de la BD "users" para hacer las transacciones. El resto de decoradores son autodefinitorios. */
