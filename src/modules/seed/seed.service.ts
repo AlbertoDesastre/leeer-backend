@@ -44,7 +44,7 @@ export class SeedService {
         title: `Obra de ${user.nickname}`,
         synopsis: `Una obra creada por ${user.nickname} como parte del seeder.`,
         isDraft: !!Math.round(Math.random()), // esto es equivalente a escoger aleatoriamente entre 0 y 1, que luego transformo a boolean con "!!"
-        thumbnail: `https://example.com/${user.nickname.toLowerCase()}.jpg`,
+        thumbnail: '',
       };
 
       try {
