@@ -125,6 +125,24 @@ export class CreationsService {
       this.handleException(error);
     }
   }
+  /* Todas las creaciones públicas de un autor */
+  async findAllByAuthorNickname(nickname: string, paginationDto: PaginationDto) {
+    const { limit = this.paginationLimit, offset = 0 } = paginationDto;
+    const user = await this.userRepository.findOneBy({ nickname }); // en base al nickname cojo el ID del usuario pa después buscar las creations
+
+    if (!user) throw new NotFoundException(`No se encontró el autor con nickname: ${nickname}`);
+
+    const creations = await this.creationsRepository.find({
+      where: { user: { user_id: user.user_id }, is_draft: false },
+      take: limit,
+      skip: offset,
+    });
+
+    if (!creations || creations.length === 0)
+      throw new NotFoundException('No se han encontrado creaciones para este autor.');
+
+    return creations;
+  }
 
   handleException(error) {
     this.logger.error(error); // en cualquier tipo de error me interesa el logeo.

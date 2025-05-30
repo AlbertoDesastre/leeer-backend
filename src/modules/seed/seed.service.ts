@@ -48,6 +48,10 @@ export class SeedService {
       };
 
       try {
+        // Para algunas pruebas necesito más de una obra creada por autor
+        await this.creationService.create(creationDto);
+        await this.creationService.create(creationDto);
+        await this.creationService.create(creationDto);
         await this.creationService.create(creationDto);
       } catch (error) {
         console.log(error);
