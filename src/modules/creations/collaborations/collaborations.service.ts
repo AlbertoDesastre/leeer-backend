@@ -163,7 +163,7 @@ export class CollaborationsService {
   async updateCollaborationPetition(
     creation_collaboration_id: string,
     updateCreationCollaborationDto: UpdateCreationCollaborationDto,
-  ): Promise<CreationCollaboration> {
+  ) {
     let collaboration = await this.creationCollaborationRepository.preload({
       creation_collaboration_id,
       ...updateCreationCollaborationDto,
@@ -183,6 +183,19 @@ export class CollaborationsService {
     }
 
     return collaboration;
+  }
+
+  async deleteCollaborationPetition(user: User, creation_collaboration_id: string) {
+    let collaboration = await this.getCollaborationPetition(user, creation_collaboration_id);
+
+    try {
+      await this.creationCollaborationRepository.delete({
+        creation_collaboration_id: collaboration.creation_collaboration_id,
+      });
+      return `La petición con id ${creation_collaboration_id} fue eliminada.`;
+    } catch (error) {
+      this.handleException(error);
+    }
   }
 
   handleException(error) {
