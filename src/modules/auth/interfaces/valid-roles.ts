@@ -1,5 +1,5 @@
 export enum VALID_ROLES {
-  GUEST = 'guest',
   ORIGINAL_AUTHOR = 'original-author',
+  PENDING_COLLABORATOR = 'pending-collaborator',
   COLLABORATOR = 'collaborator',
 }

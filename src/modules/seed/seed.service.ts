@@ -2,21 +2,28 @@ import { User } from '@/modules/users/entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { usersSeed } from '../data';
+import { usersSeed } from './data';
 import { CreateCreationDto } from '@/modules/creations/dto/create-creation.dto';
 import { Creation } from '@/modules/creations/entities/creation.entity';
-import { CreationsService } from '@/modules/creations/services/creations.service';
-import { UsersService } from '@/modules/users/services/users.service';
+import { CreationsService } from '@/modules/creations/creations.service';
+
 import { AuthService } from '@/modules/auth/services/auth.service';
 import { CreateCollaborationPetitionDto } from '@/modules/creations/dto/create-creation-collaboration-petition.dto';
+import { CollaborationsService } from '@/modules/creations/collaborations/collaborations.service';
+import { PartsService } from '../creations/parts/parts.service';
+import { CreatePartDto } from '../creations/parts/dto/create-part.dto';
+import { Part } from '../creations/parts/entities/part.entity';
 
 @Injectable()
 export class SeedService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Creation) private readonly creationRepository: Repository<Creation>,
+    @InjectRepository(Part) private readonly partRepository: Repository<Part>,
     private readonly authService: AuthService,
     private readonly creationService: CreationsService,
+    private readonly collaborationService: CollaborationsService,
+    private readonly partService: PartsService,
   ) {}
 
   // Utilizo los servicios en vez de los repositorios para insertar porque hay ciertas lógicas como encriptar las contraseñas qeu solo están disponibles ahí.
@@ -36,8 +43,7 @@ export class SeedService {
         user_id: user.user_id,
         title: `Obra de ${user.nickname}`,
         synopsis: `Una obra creada por ${user.nickname} como parte del seeder.`,
-        // isDraft: !!Math.round(Math.random()) esto es equivalente a escoger aleatoriamente entre 0 y 1, que luego transformo a boolean con "!!"
-        isDraft: null, // null indica que la petición está pendiente o bien de ser aprobada o bien ser rechazada
+        isDraft: !!Math.round(Math.random()), // esto es equivalente a escoger aleatoriamente entre 0 y 1, que luego transformo a boolean con "!!"
         thumbnail: `https://example.com/${user.nickname.toLowerCase()}.jpg`,
       };
 
@@ -49,6 +55,7 @@ export class SeedService {
     }
 
     await this.findAndCreateCollabPetitions();
+    await this.createPartsForCreations();
 
     return 'Datos insertados en BD.';
   }
@@ -74,9 +81,9 @@ export class SeedService {
       };
 
       try {
-        await this.creationService.sendCollaborationPetition(
+        await this.collaborationService.sendCollaborationPetition(
           collaborator,
-          creation.creation_id,
+          creation,
           collaborationPetition,
         );
       } catch (error) {
@@ -85,10 +92,48 @@ export class SeedService {
     }
   }
 
+  async createPartsForCreations() {
+    const users = await this.userRepository.find();
+
+    // esta operación se hace para cada usuario.
+    for (const user of users) {
+      // agarro todas las creaciones
+
+      const creations = await this.creationRepository.find({
+        where: { user },
+      });
+
+      // y a cada creación le añado una parte escrita por su autor original
+      for (const creation of creations) {
+        for (let i = 1; i <= 3; i++) {
+          const createPartDto: CreatePartDto = {
+            title: `Parte ${i} de "${creation.title}"`,
+            content: `Contenido ficticio de la parte ${i} escrita por ${user.nickname}.`,
+            isDraft: !!Math.round(Math.random()), // boolean aleatorio
+            thumbnail: `https://example.com/thumbnails/${user.nickname.toLowerCase()}-${i}.jpg`,
+          };
+
+          // Me ha dejado de servir el servicio porque para obtener la creation necesita estar en la request. A partir de ahora lo hago
+          const part = this.partRepository.create({
+            ...createPartDto,
+            creation,
+            user,
+          });
+
+          try {
+            await this.partRepository.save(part);
+          } catch (error) {
+            console.log(error);
+          }
+        }
+      }
+    }
+  }
+
   async deleteAllData() {
     await this.userRepository.deleteAll();
     await this.creationRepository.deleteAll();
-    // no hace falta deletear las colaboraciones porque "Creation" tiene borrado en cascada
+    // no hace falta deletear las colaboraciones ni partes porque "Creation" tiene borrado en cascada
 
     console.log('Se eliminó toda la data antes de ejecutar el seed.');
   }
