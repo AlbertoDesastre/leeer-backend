@@ -96,6 +96,28 @@ export class CreationsService {
     return creation;
   }
 
+  async findAllByTerm(term: string, paginationDto: PaginationDto): Promise<Creation[]> {
+    const { limit = this.paginationLimit, offset = 0 } = paginationDto;
+
+    const query = this.creationsRepository
+      .createQueryBuilder('creat')
+      .where('LOWER(creat.title) LIKE :title AND creat.is_draft = false', {
+        title: `%${term.toLowerCase()}%`,
+      })
+      .leftJoinAndSelect('creat.user', 'creatUsers')
+      .take(limit)
+      .skip(offset)
+      .getMany();
+
+    const creations = await query;
+
+    if (creations.length === 0) {
+      throw new NotFoundException('No hay ninguna creación que aplique a tu búsqueda.');
+    }
+
+    return creations;
+  }
+
   async update(id: string, updateCreationDto: UpdateCreationDto) {
     const creation = await this.creationsRepository.preload({
       creation_id: id,
