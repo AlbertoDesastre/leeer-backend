@@ -119,6 +119,7 @@ export class SeedService {
 
           // Me ha dejado de servir el servicio porque para obtener la creation necesita estar en la request. A partir de ahora lo hago
           const part = this.partRepository.create({
+            is_draft: createPartDto.isDraft, // tengo que hacer esto porque en el DTO y en la entity la misma columna no se llaman igual
             ...createPartDto,
             creation,
             user,
