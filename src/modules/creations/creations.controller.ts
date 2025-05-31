@@ -40,10 +40,6 @@ export class CreationsController {
     return this.creationsService.remove(id);
   }
 
-  /**
-   * Obtiene todas las creaciones públicas de un autor por su nickname, con paginación
-   * Ejemplo de ruta: GET /creations/author/:nickname?limit=10&offset=0
-   */
   @Get('author/:nickname')
   findAllByAuthorNickname(
     @Param('nickname') nickname: string,
