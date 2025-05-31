@@ -112,10 +112,6 @@ export class PartsService {
     return parts;
   }
 
-  /**
-   * Obtiene las partes de una creación e indica si cada parte es original o colaboración.
-   * Devuelve un array de partes con un campo extra: { isCollaboration: boolean }
-   */
   async findAllWithCollabInfo({
     creation_id,
     paginationDto,
@@ -131,8 +127,8 @@ export class PartsService {
     const creation = await this.creationService.findOne(creation_id);
     if (!creation) throw new NotFoundException('No hay ninguna creation con este ID.');
 
-    // Aprovecho mi genial api para coger a todos los que se que colaboran ya.
-    const collaborators = await this.collaborationService.findAllCollaborationPetitionsByCreation(
+    // Obtener todas las colaboraciones aprobadas
+    const collaborations = await this.collaborationService.findAllCollaborationPetitionsByCreation(
       creation.user,
       creation,
       { limit, offset },
@@ -151,14 +147,29 @@ export class PartsService {
       relations: { user: true },
     });
 
-    // Añadir info de colaboración
+    // Añadir la info extra
     return parts.map((part) => {
+      const isOriginal = part.user.user_id === creation.user.user_id;
+      let collaborationType: string[] = [];
+      if (!isOriginal) {
+        // Cojo las colaboraciones de este usuario para esta creación
+        const userCollabs = collaborations.filter(
+          (collab) =>
+            collab.user.user_id === part.user.user_id &&
+            collab.approved_by_original_author === true,
+        );
+        /* Si alguno de estos tipos se encontró lo empujo en el array */
+        if (userCollabs.length > 0) {
+          if (userCollabs.some((c) => c.is_canon)) collaborationType.push('canon');
+          if (userCollabs.some((c) => c.is_spin_off)) collaborationType.push('spinoff');
+          if (userCollabs.some((c) => c.is_fanfiction)) collaborationType.push('fanfiction');
+        }
+      }
       return {
         ...part,
-        isCollaboration:
-          /* Si hay alguna colaboración que coincida con el que creó la parte y además la parte la escribió alguien que NO es el autor original, entonces la escribió un colaborador */
-          part.user.user_id !== creation.user.user_id,
-        isOriginal: part.user.user_id === creation.user.user_id,
+        isCollaboration: !isOriginal,
+        isOriginal,
+        collaborationType,
       };
     });
   }
