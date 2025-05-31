@@ -152,14 +152,15 @@ export class PartsService {
     });
 
     // Añadir info de colaboración
-    return parts.map((part) => ({
-      ...part,
-      isCollaboration:
-        /* Si hay alguna colaboración que coincida con el que creó la parte y además la parte la escribió alguien que NO es el autor original, entonces la escribió un colaborador */
-        collaborators.some((collab: any) => collab.user_id === part.user.user_id) &&
-        part.user.user_id !== creation.user.user_id,
-      isOriginal: part.user.user_id === creation.user.user_id,
-    }));
+    return parts.map((part) => {
+      return {
+        ...part,
+        isCollaboration:
+          /* Si hay alguna colaboración que coincida con el que creó la parte y además la parte la escribió alguien que NO es el autor original, entonces la escribió un colaborador */
+          part.user.user_id !== creation.user.user_id,
+        isOriginal: part.user.user_id === creation.user.user_id,
+      };
+    });
   }
 
   async update(id: string, updateCreationDto: UpdatePartDto) {
