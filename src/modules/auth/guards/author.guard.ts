@@ -18,14 +18,12 @@ import { VALID_ROLES } from '../interfaces/valid-roles';
 @Injectable()
 export class AuthorGuard implements CanActivate {
   constructor(
-    private readonly reflector: Reflector,
     @InjectRepository(Creation)
     private readonly creationRepository: Repository<Creation>,
     @InjectRepository(CreationCollaboration)
     private readonly creationCollaborationRepository: Repository<CreationCollaboration>,
   ) {}
 
-  // reflector permite leer cualquier metadata que haya sido incluida a través de los decorators, se hace pasándole el nombre del metadato más el contexto. Fuente: https://docs.nestjs.com/fundamentals/execution-context#reflection-and-metadata
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const { creation_id } = request.params as { creation_id: string };

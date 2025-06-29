@@ -19,6 +19,8 @@ import { CreatePartDto } from './dto/create-part.dto';
 import { Part } from './entities/part.entity';
 import { UpdatePartDto } from './dto/update-part.dto';
 import { Creation } from '../entities/creation.entity';
+import { CollaborationsService } from '../collaborations/collaborations.service';
+import { PartWithCollabInfoDto } from './dto/part-with-collab-info.dto';
 
 @Injectable()
 export class PartsService {
@@ -28,9 +30,9 @@ export class PartsService {
   constructor(
     private readonly configService: ConfigService,
     @InjectRepository(Part) private readonly partRepository: Repository<Part>,
-    @InjectRepository(CreationCollaboration)
-    private readonly creationCollaborationRepository: Repository<CreationCollaboration>,
+
     private readonly creationService: CreationsService,
+    private readonly collaborationService: CollaborationsService,
   ) {
     this.logger = new Logger();
     this.paginationLimit = this.configService.get<number>('paginationLimit');
@@ -108,6 +110,68 @@ export class PartsService {
     });
 
     return parts;
+  }
+
+  async findAllWithCollabInfo({
+    creation_id,
+    paginationDto,
+    showDrafts,
+  }: {
+    creation_id: string;
+    paginationDto: PaginationDto;
+    showDrafts: boolean;
+  }): Promise<PartWithCollabInfoDto[]> {
+    const { limit = this.paginationLimit, offset = 0 } = paginationDto;
+    if (!creation_id)
+      throw new BadRequestException('No pasaste el ID de la creation que estás buscando.');
+    const creation = await this.creationService.findOne(creation_id);
+    if (!creation) throw new NotFoundException('No hay ninguna creation con este ID.');
+
+    // Obtener todas las colaboraciones aprobadas
+    const collaborations = await this.collaborationService.findAllCollaborationPetitionsByCreation(
+      creation.user,
+      creation,
+      { limit, offset },
+    );
+
+    /* Lo mismo, si quiero mostrar los Drafts es porque se que el usuario es el creador */
+    const condition = showDrafts
+      ? { creation: { creation_id } }
+      : { creation: { creation_id }, is_draft: false };
+
+    /* Aquí saco la info de quién creo cada parte */
+    const parts = await this.partRepository.find({
+      where: condition,
+      take: limit,
+      skip: offset,
+      relations: { user: true },
+    });
+
+    // Añadir la info extra
+    return parts.map((part) => {
+      const isOriginal = part.user.user_id === creation.user.user_id;
+      let collaborationType: string[] = [];
+      if (!isOriginal) {
+        // Cojo las colaboraciones de este usuario para esta creación
+        const userCollabs = collaborations.filter(
+          (collab) =>
+            collab.user.user_id === part.user.user_id &&
+            collab.approved_by_original_author === true,
+        );
+        /* Si alguno de estos tipos se encontró lo empujo en el array */
+        if (userCollabs.length > 0) {
+          if (userCollabs.some((c) => c.is_canon)) collaborationType.push('canon');
+          if (userCollabs.some((c) => c.is_spin_off)) collaborationType.push('spinoff');
+          if (userCollabs.some((c) => c.is_fanfiction)) collaborationType.push('fanfiction');
+        }
+      }
+      return {
+        ...part,
+        isCollaboration: !isOriginal,
+        isOriginal,
+        collaborationType,
+      };
+    });
   }
 
   async update(id: string, updateCreationDto: UpdatePartDto) {

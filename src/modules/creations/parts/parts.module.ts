@@ -13,10 +13,18 @@ import { AuthModule } from '@/modules/auth/auth.module';
 import { AuthService } from '@/modules/auth/services/auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { CreationsService } from '../creations.service';
+import { CollaborationsService } from '../collaborations/collaborations.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Creation, CreationCollaboration, Part]), AuthModule],
   controllers: [PartsController],
-  providers: [ConfigService, AuthService, JwtService, PartsService, CreationsService],
+  providers: [
+    ConfigService,
+    AuthService,
+    JwtService,
+    PartsService,
+    CreationsService,
+    CollaborationsService,
+  ],
 })
 export class PartsModule {}

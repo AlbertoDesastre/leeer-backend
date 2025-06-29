@@ -70,4 +70,16 @@ export class PartsController {
   remove(@GetCreation() creation: Creation, @Param('id', ParseUUIDPipe) id: string) {
     return this.partsService.remove(creation.creation_id, id);
   }
+
+  @Get('collab-info')
+  findAllWithCollabInfo(
+    @Param('creation_id') creation_id: string,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.partsService.findAllWithCollabInfo({
+      creation_id,
+      paginationDto,
+      showDrafts: false,
+    });
+  }
 }

@@ -44,10 +44,14 @@ export class SeedService {
         title: `Obra de ${user.nickname}`,
         synopsis: `Una obra creada por ${user.nickname} como parte del seeder.`,
         isDraft: !!Math.round(Math.random()), // esto es equivalente a escoger aleatoriamente entre 0 y 1, que luego transformo a boolean con "!!"
-        thumbnail: `https://example.com/${user.nickname.toLowerCase()}.jpg`,
+        thumbnail: '',
       };
 
       try {
+        // Para algunas pruebas necesito más de una obra creada por autor
+        await this.creationService.create(creationDto);
+        await this.creationService.create(creationDto);
+        await this.creationService.create(creationDto);
         await this.creationService.create(creationDto);
       } catch (error) {
         console.log(error);
@@ -56,6 +60,7 @@ export class SeedService {
 
     await this.findAndCreateCollabPetitions();
     await this.createPartsForCreations();
+    await this.createCollabPartsForCreations();
 
     return 'Datos insertados en BD.';
   }
@@ -74,7 +79,7 @@ export class SeedService {
       if (collaborator.user_id === authorId) continue;
 
       const collaborationPetition: CreateCollaborationPetitionDto = {
-        approved_by_original_author: null,
+        approved_by_original_author: true, // para hacer mis pruebas las apruebo todas
         is_fanfiction: false,
         is_spin_off: true,
         is_canon: true,
@@ -95,10 +100,8 @@ export class SeedService {
   async createPartsForCreations() {
     const users = await this.userRepository.find();
 
-    // esta operación se hace para cada usuario.
     for (const user of users) {
       // agarro todas las creaciones
-
       const creations = await this.creationRepository.find({
         where: { user },
       });
@@ -115,6 +118,7 @@ export class SeedService {
 
           // Me ha dejado de servir el servicio porque para obtener la creation necesita estar en la request. A partir de ahora lo hago
           const part = this.partRepository.create({
+            is_draft: createPartDto.isDraft, // tengo que hacer esto porque en el DTO y en la entity la misma columna no se llaman igual
             ...createPartDto,
             creation,
             user,
@@ -126,6 +130,47 @@ export class SeedService {
             console.log(error);
           }
         }
+      }
+    }
+  }
+
+  /* Añado 3 partes colaborativas x creación. */
+  async createCollabPartsForCreations() {
+    const creations = await this.creationRepository.find({
+      relations: ['creation_collaborations', 'user'],
+    });
+
+    for (const creation of creations) {
+      // tengo solo los colaboradores aprobados
+      const approvedCollabs = creation.creation_collaborations
+        .filter(
+          (collab) =>
+            collab.approved_by_original_author === true &&
+            collab.user.user_id !== creation.user.user_id,
+        )
+        .map((collab) => collab.user);
+
+      let i = 1;
+      for (const collaborator of approvedCollabs) {
+        const createPartDto: CreatePartDto = {
+          title: `Parte C: ¡COLABORACIÓN ${i}! de "${creation.title}"`,
+          content: `Contenido ficticio de la parte ${i} escrita por ${collaborator.nickname}.`,
+          isDraft: !!Math.round(Math.random()),
+          thumbnail: null,
+        };
+
+        const part = this.partRepository.create({
+          is_draft: createPartDto.isDraft,
+          ...createPartDto,
+          creation,
+          user: collaborator,
+        });
+        try {
+          await this.partRepository.save(part);
+        } catch (error) {
+          console.log(error);
+        }
+        i++;
       }
     }
   }

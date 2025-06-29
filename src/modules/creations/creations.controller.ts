@@ -40,6 +40,19 @@ export class CreationsController {
     return this.creationsService.remove(id);
   }
 
+  @Get('author/:nickname')
+  findAllByAuthorNickname(
+    @Param('nickname') nickname: string,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.creationsService.findAllByAuthorNickname(nickname, paginationDto);
+  }
+
+  @Get('all-by/:term')
+  findAllByTerm(@Param('term') term: string, @Query() paginationDto: PaginationDto) {
+    return this.creationsService.findAllByTerm(term, paginationDto);
+  }
+
   @Get(':term') // ¡Esta ruta debe ir al final siempre, porque hace mathing dinámico con cualquier cosa! Las rutas específicas, en Nest, van siempre lo más arriba posible.
   findOne(@Param('term') term: string) {
     return this.creationsService.findOne(term);

@@ -96,6 +96,28 @@ export class CreationsService {
     return creation;
   }
 
+  async findAllByTerm(term: string, paginationDto: PaginationDto): Promise<Creation[]> {
+    const { limit = this.paginationLimit, offset = 0 } = paginationDto;
+
+    const query = this.creationsRepository
+      .createQueryBuilder('creat')
+      .where('LOWER(creat.title) LIKE :title AND creat.is_draft = false', {
+        title: `%${term.toLowerCase()}%`,
+      })
+      .leftJoinAndSelect('creat.user', 'creatUsers')
+      .take(limit)
+      .skip(offset)
+      .getMany();
+
+    const creations = await query;
+
+    if (creations.length === 0) {
+      throw new NotFoundException('No hay ninguna creación que aplique a tu búsqueda.');
+    }
+
+    return creations;
+  }
+
   async update(id: string, updateCreationDto: UpdateCreationDto) {
     const creation = await this.creationsRepository.preload({
       creation_id: id,
@@ -124,6 +146,24 @@ export class CreationsService {
     } catch (error) {
       this.handleException(error);
     }
+  }
+  /* Todas las creaciones públicas de un autor */
+  async findAllByAuthorNickname(nickname: string, paginationDto: PaginationDto) {
+    const { limit = this.paginationLimit, offset = 0 } = paginationDto;
+    const user = await this.userRepository.findOneBy({ nickname }); // en base al nickname cojo el ID del usuario pa después buscar las creations
+
+    if (!user) throw new NotFoundException(`No se encontró el autor con nickname: ${nickname}`);
+
+    const creations = await this.creationsRepository.find({
+      where: { user: { user_id: user.user_id }, is_draft: false },
+      take: limit,
+      skip: offset,
+    });
+
+    if (!creations || creations.length === 0)
+      throw new NotFoundException('No se han encontrado creaciones para este autor.');
+
+    return creations;
   }
 
   handleException(error) {
