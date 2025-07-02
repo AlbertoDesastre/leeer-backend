@@ -49,6 +49,8 @@ export class CreationsService {
       ...creationDto,
     }); // esta línea sólo crea la instancia de la creación, todavía no la grabó en base de datos
 
+    console.log(creation);
+
     try {
       await this.creationsRepository.save(creation);
       return creation;

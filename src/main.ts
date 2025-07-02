@@ -15,6 +15,10 @@ async function bootstrap() {
     credentials: true, // Me deja usar cookies y autenticación
   });
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT ?? 3015;
+
+  await app.listen(port);
+
+  console.log(`Corriendo en el port ${port}`);
 }
 bootstrap();
