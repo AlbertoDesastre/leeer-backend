@@ -42,7 +42,6 @@ export class SeedService {
       const creationDto: CreateCreationDto = {
         user_id: user.user_id,
         title: `Obra de ${user.nickname}`,
-        description: '',
         synopsis: `Una obra creada por ${user.nickname} como parte del seeder.`,
         isDraft: !!Math.round(Math.random()), // esto es equivalente a escoger aleatoriamente entre 0 y 1, que luego transformo a boolean con "!!"
         thumbnail: '',
