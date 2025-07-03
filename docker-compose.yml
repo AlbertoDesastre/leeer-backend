@@ -10,6 +10,8 @@ services:
       MYSQL_PASSWORD: leeer-password
     ports:
       - '3306:3306'
+    volumes:
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   api:
     build: ./
