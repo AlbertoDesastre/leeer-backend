@@ -1,5 +1,5 @@
-# Usa Node LTS como base
-FROM node:20
+# Creo mi máquina con la versión 20 de node y un SO Linux alpine con lo mínimo para que corra
+FROM node:20.19.3-alpine3.22
 
 # Crea carpeta de trabajo en el contenedor
 WORKDIR /usr/src/app
