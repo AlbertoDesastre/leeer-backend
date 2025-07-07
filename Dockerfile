@@ -4,16 +4,12 @@ FROM node:20.19.3-alpine3.22
 # Crea carpeta de trabajo en el contenedor
 WORKDIR /usr/src/app
 
-# Copia package.json y package-lock a la carpeta destino, que siempre será el argumento final
-COPY package*.json ./
+# Copia todo mi proyecto a la carpeta destino, que siempre será el argumento final
+COPY . ./
+COPY package*.json tsconfig.json tsconfig.build.json ./
 
-# Instala dependencias
-RUN npm install
-
-# Copia todo el resto
-COPY . .
-
-# Construye el proyecto
+# Instala dependencias y crea la build de producción
+RUN npm install 
 RUN npm run build
 
 # Expone el puerto
