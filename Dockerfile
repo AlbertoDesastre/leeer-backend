@@ -1,10 +1,10 @@
 # Usa Node LTS como base
 FROM node:20
 
-# Crea carpeta de trabajo
+# Crea carpeta de trabajo en el contenedor
 WORKDIR /usr/src/app
 
-# Copia package.json y package-lock
+# Copia package.json y package-lock a la carpeta destino, que siempre será el argumento final
 COPY package*.json ./
 
 # Instala dependencias
