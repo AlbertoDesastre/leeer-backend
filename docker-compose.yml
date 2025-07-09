@@ -1,0 +1,32 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: leeer-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_DATABASE: '${DB_NAME}'
+      MYSQL_USER: '${DB_USER}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+    ports:
+      - '${DB_PORT}:${DB_PORT}'
+    volumes:
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  api:
+    build: ./
+    container_name: leeer-api
+    restart: always
+    environment:
+      SECRET: '${SECRET}'
+      PORT: '${PORT}'
+      DB_TYPE: '${DB_TYPE}'
+      DB_HOST: db # OJO! Es un error que, como venía haciendo antes, declarase un localhost como "127.0.0.1", porque la BBDD está levantada en un contenedor Docker, y cada contenedor docker está AISLADO e incomunicado de otros a excepción del puerto. Ahora lo que se hace es apuntar al contenedor + su puerto expuesto, en este caso "db:3306"
+      DB_USER: '${DB_USER}'
+      DB_PASSWORD: '${DB_PASSWORD}'
+      DB_NAME: '${DB_NAME}'
+      DB_PORT: '${DB_PORT}'
+    ports:
+      - '3000:${PORT}' # 1er parámetro: Puerto de mi PC // 2do parámetro: Puerto del contenedor
+    depends_on:
+      - db
