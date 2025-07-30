@@ -16,8 +16,8 @@ import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 import { User } from '@/modules/users/entities/user.entity';
 
 import { CreationCollaboration } from './entities/creation-collaboration.entity';
-import { CreateCollaborationPetitionDto } from '../dto/create-creation-collaboration-petition.dto';
-import { UpdateCreationCollaborationDto } from '../dto/update-creation-collaboration-petition.dto';
+import { CreateCollaborationPetitionDto } from './dto/create-creation-collaboration-petition.dto';
+import { UpdateCreationCollaborationDto } from './dto/update-creation-collaboration-petition.dto';
 import { CreationsService } from '../creations.service';
 
 @Injectable()

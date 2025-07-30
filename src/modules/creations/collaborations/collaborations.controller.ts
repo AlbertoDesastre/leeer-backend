@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body, Patch, Query, ParseUUIDPipe, Param } from '@nestjs/common';
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
-import { CreateCollaborationPetitionDto } from '../dto/create-creation-collaboration-petition.dto';
+import { CreateCollaborationPetitionDto } from './dto/create-creation-collaboration-petition.dto';
 import { CollaborationPaginationDto } from '@/modules/common/dto/collaborations-pagination-dto.dto';
-import { UpdateCreationCollaborationDto } from '../dto/update-creation-collaboration-petition.dto';
+import { UpdateCreationCollaborationDto } from './dto/update-creation-collaboration-petition.dto';
 
 import { Authenticate } from '@/modules/auth/decorators/authenticate.decorator';
 import { VALID_ROLES } from '@/modules/auth/interfaces/valid-roles';
