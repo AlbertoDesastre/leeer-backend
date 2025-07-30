@@ -1,3 +1,4 @@
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   Controller,
   Get,
@@ -13,14 +14,18 @@ import {
 import { CreationsService } from '@/modules/creations/creations.service';
 import { CreateCreationDto } from '@/modules/creations/dto/create-creation.dto';
 import { UpdateCreationDto } from '@/modules/creations/dto/update-creation.dto';
-
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
+import { Creation } from './entities/creation.entity';
 
+@ApiTags('Creations')
 @Controller('creations')
 export class CreationsController {
   constructor(private readonly creationsService: CreationsService) {}
 
   @Post()
+  @ApiResponse({ status: 201, type: Creation })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'El usuario no se encontró.' })
   create(@Body() createCreationDto: CreateCreationDto) {
     return this.creationsService.create(createCreationDto);
   }
