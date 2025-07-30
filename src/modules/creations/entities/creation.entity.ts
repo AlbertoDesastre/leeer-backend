@@ -72,6 +72,7 @@ export class Creation {
   modification_date: string;
 
   // relación con los usuarios + breve explicación de sintaxis
+  @ApiProperty({ description: 'Usuario autor de la creación', type: () => User })
   @ManyToOne(
     () => User, // primero le asigno la Entidad objetivo
     (user) => user.creations, // luego, dentro de esa entidad, por qué propiedad está conectada
