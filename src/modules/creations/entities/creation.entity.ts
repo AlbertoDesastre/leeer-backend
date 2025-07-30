@@ -1,3 +1,5 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 import {
   Column,
   CreateDateColumn,
@@ -12,7 +14,6 @@ import {
 import { User } from '@/modules/users/entities/user.entity';
 import { Part } from '@/modules/creations/parts/entities/part.entity';
 import { CreationCollaboration } from '../collaborations/entities/creation-collaboration.entity';
-import { ApiProperty } from '@nestjs/swagger';
 
 /* @Entity marca la tabla real de la BD "creations" para hacer las transacciones. El resto de decoradores son autodefinitorios. */
 @Entity('creations')
@@ -80,16 +81,19 @@ export class Creation {
   )
   // He tenido que poner este JoinColumn porque en mi base de dato la columna se llama "user_id" y no "userid", que es lo que TypeORM estaba infiriendo y buscando. Como no lo encontraba en la tabla usuarios, petaba.
   @JoinColumn({ name: 'user_id' })
-  @ApiProperty()
+  @ApiProperty({ description: 'Autor original', type: () => User })
   user: User;
 
   @OneToMany(() => CreationCollaboration, (creationCollaboration) => creationCollaboration.creation)
   @JoinColumn({ name: 'creation_collaboration_id' })
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Todas las colaboraciones asociadas a la creación',
+    type: () => CreationCollaboration,
+  })
   creation_collaborations?: CreationCollaboration[];
 
   @OneToMany(() => Part, (part) => part.creation)
   @JoinColumn({ name: 'part_id' })
-  @ApiProperty()
+  @ApiProperty({ description: 'Todas las partes escritas de la creación', type: () => Part })
   parts?: Part[];
 }
