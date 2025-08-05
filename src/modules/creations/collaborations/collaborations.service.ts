@@ -127,8 +127,8 @@ export class CollaborationsService {
   }
 
   async findAllCollaborationPetitionsByCreation(
-    user: User,
-    creat: Creation,
+    user: User | Omit<User, 'password'>, // TODO: ¿Hay una mejor manera de tipar esto? Se cambió el DTO de Response de algunos GetCreations. Esos DTOS incluyen la entidad usuario sin el atributo "password"
+    creat: Creation | CreationWithoutUserDto,
     paginationDto: PaginationDto,
   ): Promise<CreationCollaboration[]> {
     const { limit = this.paginationLimit, offset = 0 } = paginationDto;
