@@ -17,6 +17,7 @@ import { CreateCreationDto } from '@/modules/creations/dto/create-creation.dto';
 import { UpdateCreationDto } from '@/modules/creations/dto/update-creation.dto';
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 import { Creation } from './entities/creation.entity';
+import { GetAllCreationsResponseDto } from './dto/get-all-creations-response.dto';
 
 @ApiTags('Creations')
 @Controller('creations')
@@ -35,7 +36,7 @@ export class CreationsController {
 
   @Get()
   @ApiOperation({ summary: 'Obtener todas las creaciones públicas (paginadas)' })
-  @ApiResponse({ status: 200, type: Creation })
+  @ApiResponse({ status: 200, type: GetAllCreationsResponseDto, isArray: true })
   findAll(@Query() paginationDto: PaginationDto) {
     return this.creationsService.findAll(paginationDto);
   }

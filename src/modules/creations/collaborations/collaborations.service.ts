@@ -19,6 +19,7 @@ import { CreationCollaboration } from './entities/creation-collaboration.entity'
 import { CreateCollaborationPetitionDto } from './dto/create-creation-collaboration-petition.dto';
 import { UpdateCreationCollaborationDto } from './dto/update-creation-collaboration-petition.dto';
 import { CreationsService } from '../creations.service';
+import { CreationWithoutUserDto } from '../dto/creation-without-user.dto';
 
 @Injectable()
 export class CollaborationsService {
@@ -66,7 +67,7 @@ export class CollaborationsService {
 
   async sendCollaborationPetition(
     user: User,
-    creat: Creation,
+    creat: Creation | CreationWithoutUserDto,
     createCollaborationPetitionDto: CreateCollaborationPetitionDto,
   ) {
     const { creation_id } = creat;

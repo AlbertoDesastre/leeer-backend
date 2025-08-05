@@ -17,6 +17,7 @@ import { Creation } from '@/modules/creations/entities/creation.entity';
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 import { User } from '@/modules/users/entities/user.entity';
 import { CreationCollaboration } from './collaborations/entities/creation-collaboration.entity';
+import { GetAllCreationsResponseDto } from './dto/get-all-creations-response.dto';
 
 @Injectable()
 export class CreationsService {
@@ -57,17 +58,17 @@ export class CreationsService {
     }
   }
 
-  findAll(paginationDto: PaginationDto): Promise<Creation[]> {
+  findAll(paginationDto: PaginationDto): Promise<GetAllCreationsResponseDto[]> {
     const { limit = this.paginationLimit, offset = 0 } = paginationDto;
     const creations = this.creationsRepository.find({
       where: { is_draft: false }, // solo se mostrarán las creations públicas para los usuarios
-      take: limit,
+      take: limit, // take = toma el número de datos solicitado por paginationLimit | skip: se salta el número de resultados solicitados por offset
       skip: offset,
       relations: {
         // encontré el modo de regresar toda la data relacionada dios mío T.T
         user: true,
       },
-    }); // take = toma el número de datos solicitado por paginationLimit | skip: se salta el número de resultados solicitados por offset
+    });
 
     if (!creations) throw new NotFoundException('No se han encontrado creaciones.');
 
