@@ -122,9 +122,12 @@ export class PartsService {
     showDrafts: boolean;
   }): Promise<PartWithCollabInfoDto[]> {
     const { limit = this.paginationLimit, offset = 0 } = paginationDto;
+
     if (!creation_id)
       throw new BadRequestException('No pasaste el ID de la creation que estás buscando.');
+
     const creation = await this.creationService.findOne(creation_id);
+
     if (!creation) throw new NotFoundException('No hay ninguna creation con este ID.');
 
     // Obtener todas las colaboraciones aprobadas
@@ -151,6 +154,7 @@ export class PartsService {
     return parts.map((part) => {
       const isOriginal = part.user.user_id === creation.user.user_id;
       let collaborationType: string[] = [];
+
       if (!isOriginal) {
         // Cojo las colaboraciones de este usuario para esta creación
         const userCollabs = collaborations.filter(
@@ -158,6 +162,7 @@ export class PartsService {
             collab.user.user_id === part.user.user_id &&
             collab.approved_by_original_author === true,
         );
+
         /* Si alguno de estos tipos se encontró lo empujo en el array */
         if (userCollabs.length > 0) {
           if (userCollabs.some((c) => c.is_canon)) collaborationType.push('canon');
