@@ -1,4 +1,4 @@
-import { OmitType, PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/swagger';
 import { CreatePartDto } from './create-part.dto';
 
 // esto me quita la posibilidad de editar el creation_id

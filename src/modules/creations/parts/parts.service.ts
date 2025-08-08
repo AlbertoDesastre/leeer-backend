@@ -7,20 +7,20 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { validate as isUuid } from 'uuid';
 
 import { User } from '@/modules/users/entities/user.entity';
+import { Creation } from '../entities/creation.entity';
 import { CreationsService } from '@/modules/creations/creations.service';
+import { CollaborationsService } from '../collaborations/collaborations.service';
+import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 import { ConfigService } from '@nestjs/config';
 
-import { CreationCollaboration } from '../collaborations/entities/creation-collaboration.entity';
-import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
-import { CreatePartDto } from './dto/create-part.dto';
 import { Part } from './entities/part.entity';
+import { CreatePartDto } from './dto/create-part.dto';
+import { GetPartResponseDto } from './dto/get-part-response.dto';
 import { UpdatePartDto } from './dto/update-part.dto';
-import { Creation } from '../entities/creation.entity';
-import { CollaborationsService } from '../collaborations/collaborations.service';
-import { PartWithCollabInfoDto } from './dto/part-with-collab-info.dto';
+import { GetPartWithFullDetailDto } from './dto/get-part-with-creation-and-user.dto';
+import { COLLABORATION_TYPE, GetParWithCollabInfoDto } from './dto/get-part-with-collab-info.dto';
 
 @Injectable()
 export class PartsService {
@@ -30,7 +30,6 @@ export class PartsService {
   constructor(
     private readonly configService: ConfigService,
     @InjectRepository(Part) private readonly partRepository: Repository<Part>,
-
     private readonly creationService: CreationsService,
     private readonly collaborationService: CollaborationsService,
   ) {
@@ -38,7 +37,7 @@ export class PartsService {
     this.paginationLimit = this.configService.get<number>('paginationLimit');
   }
 
-  async create(user: User, creat: Creation, createPartDto: CreatePartDto): Promise<Part> {
+  async create(user: User, creat: Creation, createPartDto: CreatePartDto): Promise<GetPartWithFullDetailDto> {
     const { creation_id } = creat;
 
     const creation = await this.creationService.findOne(creation_id); // esto ya tira error si no lo encuentra
@@ -88,20 +87,17 @@ export class PartsService {
     creation_id: string;
     paginationDto: PaginationDto;
     showDrafts: boolean;
-  }) {
+  }): Promise<GetPartResponseDto[]> {
     const { limit = this.paginationLimit, offset = 0 } = paginationDto;
 
-    if (!creation_id)
-      throw new BadRequestException('No pasaste el ID de la creation que estás buscando.');
+    if (!creation_id) throw new BadRequestException('No pasaste el ID de la creation que estás buscando.');
 
     const creation = await this.creationService.findOne(creation_id); // Recuerdo que este método ya devuelve un NotFound si no lo encuentra.
 
     if (!creation) throw new NotFoundException('No se han encontrado creaciones.');
 
     // showDrafts solo se activa en las rutas para autores.
-    const condition = showDrafts
-      ? { creation: { creation_id } }
-      : { creation: { creation_id }, is_draft: false };
+    const condition = showDrafts ? { creation: { creation_id } } : { creation: { creation_id }, is_draft: false };
 
     const parts = this.partRepository.find({
       where: condition,
@@ -120,11 +116,10 @@ export class PartsService {
     creation_id: string;
     paginationDto: PaginationDto;
     showDrafts: boolean;
-  }): Promise<PartWithCollabInfoDto[]> {
+  }): Promise<GetParWithCollabInfoDto[]> {
     const { limit = this.paginationLimit, offset = 0 } = paginationDto;
 
-    if (!creation_id)
-      throw new BadRequestException('No pasaste el ID de la creation que estás buscando.');
+    if (!creation_id) throw new BadRequestException('No pasaste el ID de la creation que estás buscando.');
 
     const creation = await this.creationService.findOne(creation_id);
 
@@ -138,9 +133,7 @@ export class PartsService {
     );
 
     /* Lo mismo, si quiero mostrar los Drafts es porque se que el usuario es el creador */
-    const condition = showDrafts
-      ? { creation: { creation_id } }
-      : { creation: { creation_id }, is_draft: false };
+    const condition = showDrafts ? { creation: { creation_id } } : { creation: { creation_id }, is_draft: false };
 
     /* Aquí saco la info de quién creo cada parte */
     const parts = await this.partRepository.find({
@@ -152,22 +145,20 @@ export class PartsService {
 
     // Añadir la info extra
     return parts.map((part) => {
-      const isOriginal = part.user.user_id === creation.user.user_id;
-      let collaborationType: string[] = [];
+      const isOriginal = part.user.user_id === creation.user.user_id; // El autor de la obra  el autor de la parte es el mismo
+      let collaborationType: COLLABORATION_TYPE[] = [];
 
       if (!isOriginal) {
         // Cojo las colaboraciones de este usuario para esta creación
         const userCollabs = collaborations.filter(
-          (collab) =>
-            collab.user.user_id === part.user.user_id &&
-            collab.approved_by_original_author === true,
+          (collab) => collab.user.user_id === part.user.user_id && collab.approved_by_original_author === true,
         );
 
         /* Si alguno de estos tipos se encontró lo empujo en el array */
         if (userCollabs.length > 0) {
-          if (userCollabs.some((c) => c.is_canon)) collaborationType.push('canon');
-          if (userCollabs.some((c) => c.is_spin_off)) collaborationType.push('spinoff');
-          if (userCollabs.some((c) => c.is_fanfiction)) collaborationType.push('fanfiction');
+          if (userCollabs.some((c) => c.is_canon)) collaborationType.push(COLLABORATION_TYPE.CANON);
+          if (userCollabs.some((c) => c.is_spin_off)) collaborationType.push(COLLABORATION_TYPE.SPINOFF);
+          if (userCollabs.some((c) => c.is_fanfiction)) collaborationType.push(COLLABORATION_TYPE.FANFICTION);
         }
       }
       return {
@@ -179,7 +170,7 @@ export class PartsService {
     });
   }
 
-  async update(id: string, updateCreationDto: UpdatePartDto) {
+  async update(id: string, updateCreationDto: UpdatePartDto): Promise<GetPartResponseDto> {
     const part = await this.partRepository.preload({
       part_id: id,
       is_draft: updateCreationDto.isDraft,
@@ -201,7 +192,7 @@ export class PartsService {
 
     try {
       await this.partRepository.delete(part); // esta operación ni siquiera checkea si existe a creación en DB así que hay que hacer una comprobación manual
-      return `La creación con id ${id} fue eliminado.`;
+      return `La parte con id ${id} fue eliminada.`;
     } catch (error) {
       this.handleException(error);
     }

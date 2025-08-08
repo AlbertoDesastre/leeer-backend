@@ -3,7 +3,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsOptional, IsPositive } from 'class-validator';
 
-/* REVISAR CÓMO SE HACE ESTO BIEN EN EL TUTORIAL */
 export class PaginationDto {
   @ApiProperty({ default: 5, description: 'Cuántos resultados quieres traer', example: 10 })
   @IsOptional()

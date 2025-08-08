@@ -17,7 +17,6 @@ import { CreateCreationDto } from '@/modules/creations/dto/create-creation.dto';
 import { UpdateCreationDto } from '@/modules/creations/dto/update-creation.dto';
 import { GetCreationResponseDto } from './dto/get-creation-response.dto';
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
-import { Creation } from './entities/creation.entity';
 import { CreationWithoutUserDto } from './dto/creation-without-user.dto';
 import { GetPublicCreationResponseDto } from './dto/get-public-creation-response.dto';
 
@@ -71,7 +70,6 @@ export class CreationsController {
   @ApiResponse({ status: 200, type: GetPublicCreationResponseDto, isArray: true })
   findAllByAuthorNickname(
     @Param('nickname') nickname: string,
-    // documentar PaginationDTO
     @Query() paginationDto: PaginationDto,
   ) {
     return this.creationsService.findAllByAuthorNickname(nickname, paginationDto);
