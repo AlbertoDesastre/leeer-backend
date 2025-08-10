@@ -1,0 +1,246 @@
+  // Comentario del dev: Este es mi método favorito porque mezcla muchas cosas y devuelve un dato bonito y entendible.
+  async findAllMyCollaborations(user: User, paginationDto: PaginationDto): Promise<any> {
+    const { limit = this.paginationLimit, offset = 0 } = paginationDto;
+    const { user_id } = user;
+    let collaborations: CreationCollaboration[] = [];
+
+    /*     const query = this.creationCollaborationRepository
+      .createQueryBuilder('creationCollab')
+      .leftJoin('creationCollab.user', 'user')
+      .leftJoin('creationCollab.creation', 'creac')
+      .leftJoin('creac.user', 'authorUser')
+      .where('creationCollab.user.user_id = :user_id OR creac.user.user_id = :user_id', {
+        user_id,
+      })
+      .skip(offset)
+      .limit(limit)
+      .select()
+      .getMany();
+ */
+
+    const query = this.creationCollaborationRepository
+      .createQueryBuilder('creationCollab')
+      .leftJoin('creationCollab.user', 'collaborator')
+      .leftJoin('creationCollab.creation', 'creac')
+      .leftJoin('creac.user', 'author')
+      .where('collaborator.user_id = :user_id OR author.user_id = :user_id', {
+        user_id,
+      })
+      .select(['collaborator.nickname', 'collaborator.profile_picture'])
+      .skip(offset)
+      .limit(limit)
+      .getMany();
+
+    collaborations = await query;
+
+    if (!collaborations)
+      throw new NotFoundException('No has mandado ni recibido ninguna solicitud de colaboración.');
+
+    let received: CreationCollaboration[] = [];
+    let sent: CreationCollaboration[] = [];
+
+    collaborations.forEach((collaboration) => {
+      if (collaboration.user.user_id === user_id) sent.push(collaboration); // acumula todas las colaboraciones que este usuario mandó a otros autores.
+      if (collaboration.creation.user.user_id === user_id) received.push(collaboration); // aquí el autor que manda esta request observa las peticiones recibidas por otros usuarios
+    });
+
+    // TODO: Eliminar la data redundante! No quiero devolver de nuevo la "creation" a la que pertenece.
+    // Del usuario solo me interesa el nickname y el profile_picture
+    // TODO: ¿Por qué estoy juntando en la misma llamada las colaboraciones recibidas y envidas? Separar esto en dos funciones y dos rutas distintas, "collaborations/sent", "collaborations/received"
+    return { collaborations };
+  }
+
+
+
+
+// BLOC DFE NOTAS 
+
+# Otras configuraciones  
+SECRET=s01:3zkriTH0R
+PORT=3000
+# Conexiones a BBDD   
+DB_TYPE=mysql
+DB_HOST=127.0.0.1 
+DB_USER=leeer-admin
+DB_PASSWORD=leeer-password
+DB_NAME=leeer
+DB_PORT=3306
+
+
+token de terry prachet
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InByYXRjaGV0dEBkaXNjd29ybGQub3JnIiwiaWF0IjoxNzU0NzY2MzYxLCJleHAiOjE3NTUzNzExNjF9.oGwsY4dB5ii8oUnP28syT7eChxX2Ej2bWGu6na8N5Mk
+
+
+
+
+{
+    "received": [
+        {
+            "creation_collaboration_id": "5275e570-462d-4399-84c4-234fbc163326",
+            "approved_by_original_author": true,
+            "is_fanfiction": false,
+            "is_spin_off": true,
+            "is_canon": true,
+            "creation_date": "2025-08-09T19:04:49.000Z",
+            "modification_date": "2025-08-09T19:04:49.000Z",
+            "user": {
+                "user_id": "cb3e0c56-e6b1-49c7-8447-991ae5248af9",
+                "nickname": "GeorgeOrwell",
+                "email": "orwell@1984.net",
+                "profile_picture": "https://example.com/avatar5.jpg",
+                "description": "Crítico social y autor distópico."
+            },
+            "creation": {
+                "creation_id": "315769cc-afe1-4094-84c5-aad13bb1227b",
+                "title": "Obra de TerryPratchett",
+                "is_draft": false,
+                "synopsis": "Una obra creada por TerryPratchett como parte del seeder.",
+                "description": null,
+                "thumbnail": "",
+                "creation_date": "2025-08-09T19:04:48.000Z",
+                "modification_date": "2025-08-09T19:04:48.000Z",
+                "user": {
+                    "user_id": "ff09a313-dc1a-4293-9dd4-32fcfae4d3d3",
+                    "nickname": "TerryPratchett",
+                    "email": "pratchett@discworld.org",
+                    "profile_picture": "https://example.com/avatar6.jpg",
+                    "description": "Humor y fantasía con sátira inteligente."
+                }
+            }
+        },
+        {
+            "creation_collaboration_id": "5e4bc899-a96f-40cf-bc68-fa91520b4a47",
+            "approved_by_original_author": true,
+            "is_fanfiction": false,
+            "is_spin_off": true,
+            "is_canon": true,
+            "creation_date": "2025-08-09T19:04:49.000Z",
+            "modification_date": "2025-08-09T19:04:49.000Z",
+            "user": {
+                "user_id": "cb3e0c56-e6b1-49c7-8447-991ae5248af9",
+                "nickname": "GeorgeOrwell",
+                "email": "orwell@1984.net",
+                "profile_picture": "https://example.com/avatar5.jpg",
+                "description": "Crítico social y autor distópico."
+            },
+            "creation": {
+                "creation_id": "a086eba4-e21a-436a-9f8d-cfb99803dadb",
+                "title": "Obra de TerryPratchett",
+                "is_draft": false,
+                "synopsis": "Una obra creada por TerryPratchett como parte del seeder.",
+                "description": null,
+                "thumbnail": "",
+                "creation_date": "2025-08-09T19:04:48.000Z",
+                "modification_date": "2025-08-09T19:04:48.000Z",
+                "user": {
+                    "user_id": "ff09a313-dc1a-4293-9dd4-32fcfae4d3d3",
+                    "nickname": "TerryPratchett",
+                    "email": "pratchett@discworld.org",
+                    "profile_picture": "https://example.com/avatar6.jpg",
+                    "description": "Humor y fantasía con sátira inteligente."
+                }
+            }
+        },
+        {
+            "creation_collaboration_id": "8d9b407b-8417-4530-93dd-56ed01ce5330",
+            "approved_by_original_author": true,
+            "is_fanfiction": false,
+            "is_spin_off": true,
+            "is_canon": true,
+            "creation_date": "2025-08-09T19:04:49.000Z",
+            "modification_date": "2025-08-09T19:04:49.000Z",
+            "user": {
+                "user_id": "2c44df6c-39b1-4646-b6f2-fbf0e08a9c4d",
+                "nickname": "PhilipKDick",
+                "email": "pkd@reality.net",
+                "profile_picture": "https://example.com/avatar8.jpg",
+                "description": "Narrador de realidades alternativas."
+            },
+            "creation": {
+                "creation_id": "25b997e4-c1fb-46a9-adbc-006d6261a482",
+                "title": "Obra de TerryPratchett",
+                "is_draft": false,
+                "synopsis": "Una obra creada por TerryPratchett como parte del seeder.",
+                "description": null,
+                "thumbnail": "",
+                "creation_date": "2025-08-09T19:04:48.000Z",
+                "modification_date": "2025-08-09T19:04:48.000Z",
+                "user": {
+                    "user_id": "ff09a313-dc1a-4293-9dd4-32fcfae4d3d3",
+                    "nickname": "TerryPratchett",
+                    "email": "pratchett@discworld.org",
+                    "profile_picture": "https://example.com/avatar6.jpg",
+                    "description": "Humor y fantasía con sátira inteligente."
+                }
+            }
+        }
+    ],
+    "sent": [
+        {
+            "creation_collaboration_id": "006791b8-f054-4465-89a3-e886f2291b69",
+            "approved_by_original_author": true,
+            "is_fanfiction": false,
+            "is_spin_off": true,
+            "is_canon": true,
+            "creation_date": "2025-08-09T19:04:49.000Z",
+            "modification_date": "2025-08-09T19:04:49.000Z",
+            "user": {
+                "user_id": "ff09a313-dc1a-4293-9dd4-32fcfae4d3d3",
+                "nickname": "TerryPratchett",
+                "email": "pratchett@discworld.org",
+                "profile_picture": "https://example.com/avatar6.jpg",
+                "description": "Humor y fantasía con sátira inteligente."
+            },
+            "creation": {
+                "creation_id": "9e03212c-3578-4723-9867-4ab64b4426f0",
+                "title": "Obra de RayBradbury",
+                "is_draft": false,
+                "synopsis": "Una obra creada por RayBradbury como parte del seeder.",
+                "description": null,
+                "thumbnail": "",
+                "creation_date": "2025-08-09T19:04:49.000Z",
+                "modification_date": "2025-08-09T19:04:49.000Z",
+                "user": {
+                    "user_id": "a843dc51-eaec-45f2-b632-7a96a7cc4f94",
+                    "nickname": "RayBradbury",
+                    "email": "ray.bradbury@mars.com",
+                    "profile_picture": "https://example.com/avatar10.jpg",
+                    "description": "Soñador de mundos imposibles y poéticos."
+                }
+            }
+        },
+        {
+            "creation_collaboration_id": "415c8ed2-4120-4d47-8129-3c95b96224b0",
+            "approved_by_original_author": true,
+            "is_fanfiction": false,
+            "is_spin_off": true,
+            "is_canon": true,
+            "creation_date": "2025-08-09T19:04:49.000Z",
+            "modification_date": "2025-08-09T19:04:49.000Z",
+            "user": {
+                "user_id": "ff09a313-dc1a-4293-9dd4-32fcfae4d3d3",
+                "nickname": "TerryPratchett",
+                "email": "pratchett@discworld.org",
+                "profile_picture": "https://example.com/avatar6.jpg",
+                "description": "Humor y fantasía con sátira inteligente."
+            },
+            "creation": {
+                "creation_id": "e5c885c6-1288-4213-bbda-bfb8abc5739a",
+                "title": "Obra de PhilipKDick",
+                "is_draft": false,
+                "synopsis": "Una obra creada por PhilipKDick como parte del seeder.",
+                "description": null,
+                "thumbnail": "",
+                "creation_date": "2025-08-09T19:04:48.000Z",
+                "modification_date": "2025-08-09T19:04:48.000Z",
+                "user": {
+                    "user_id": "2c44df6c-39b1-4646-b6f2-fbf0e08a9c4d",
+                    "nickname": "PhilipKDick",
+                    "email": "pkd@reality.net",
+                    "profile_picture": "https://example.com/avatar8.jpg",
+                    "description": "Narrador de realidades alternativas."
+                }
+            }
+        }
+    ]
+}

@@ -8,7 +8,7 @@ import { Creation } from '@/modules/creations/entities/creation.entity';
 import { CreationsService } from '@/modules/creations/creations.service';
 
 import { AuthService } from '@/modules/auth/services/auth.service';
-import { CreateCollaborationPetitionDto } from '@/modules/creations/dto/create-creation-collaboration-petition.dto';
+import { CreateCollaborationPetitionDto } from '@/modules/creations/collaborations/dto/create-creation-collaboration-petition.dto';
 import { CollaborationsService } from '@/modules/creations/collaborations/collaborations.service';
 import { PartsService } from '../creations/parts/parts.service';
 import { CreatePartDto } from '../creations/parts/dto/create-part.dto';

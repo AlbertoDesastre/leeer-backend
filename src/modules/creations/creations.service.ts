@@ -12,11 +12,13 @@ import { validate as isUuid } from 'uuid';
 
 import { CreateCreationDto } from '@/modules/creations/dto/create-creation.dto';
 import { UpdateCreationDto } from '@/modules/creations/dto/update-creation.dto';
+import { GetCreationResponseDto } from './dto/get-creation-response.dto';
 import { Creation } from '@/modules/creations/entities/creation.entity';
 
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 import { User } from '@/modules/users/entities/user.entity';
-import { CreationCollaboration } from './collaborations/entities/creation-collaboration.entity';
+import { CreationWithoutUserDto } from './dto/creation-without-user.dto';
+import { GetPublicCreationResponseDto } from './dto/get-public-creation-response.dto';
 
 @Injectable()
 export class CreationsService {
@@ -29,14 +31,12 @@ export class CreationsService {
     private readonly creationsRepository: Repository<Creation>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(CreationCollaboration)
-    private readonly creationCollaborationRepository: Repository<CreationCollaboration>,
   ) {
     this.logger = new Logger();
     this.paginationLimit = this.configService.get<number>('paginationLimit');
   }
 
-  async create(createCreationDto: CreateCreationDto) {
+  async create(createCreationDto: CreateCreationDto): Promise<GetCreationResponseDto> {
     const { user_id, ...creationDto } = createCreationDto;
 
     const user = await this.userRepository.findOneBy({ user_id });
@@ -51,30 +51,42 @@ export class CreationsService {
 
     try {
       await this.creationsRepository.save(creation);
-      return creation;
+
+      // He tenido que construir el objeto manualmente porque JS lo devolvía con las propiedades en un orden feísimo
+      return {
+        creation_id: creation.creation_id,
+        creation_date: creation.creation_date,
+        modification_date: creation.modification_date,
+        title: creation.title,
+        is_draft: creation.is_draft,
+        synopsis: creation.synopsis,
+        description: creation.description,
+        thumbnail: creation.thumbnail,
+        user: creation.user,
+      };
     } catch (error) {
       this.handleException(error);
     }
   }
 
-  findAll(paginationDto: PaginationDto): Promise<Creation[]> {
+  findAll(paginationDto: PaginationDto): Promise<GetPublicCreationResponseDto[]> {
     const { limit = this.paginationLimit, offset = 0 } = paginationDto;
     const creations = this.creationsRepository.find({
       where: { is_draft: false }, // solo se mostrarán las creations públicas para los usuarios
-      take: limit,
+      take: limit, // take = toma el número de datos solicitado por paginationLimit | skip: se salta el número de resultados solicitados por offset
       skip: offset,
       relations: {
         // encontré el modo de regresar toda la data relacionada dios mío T.T
         user: true,
       },
-    }); // take = toma el número de datos solicitado por paginationLimit | skip: se salta el número de resultados solicitados por offset
+    });
 
     if (!creations) throw new NotFoundException('No se han encontrado creaciones.');
 
     return creations;
   }
 
-  async findOne(term: string): Promise<Creation> {
+  async findOne(term: string): Promise<GetPublicCreationResponseDto> {
     let creation: Creation;
 
     if (isUuid(term)) {
@@ -96,7 +108,10 @@ export class CreationsService {
     return creation;
   }
 
-  async findAllByTerm(term: string, paginationDto: PaginationDto): Promise<Creation[]> {
+  async findAllByTerm(
+    term: string,
+    paginationDto: PaginationDto,
+  ): Promise<GetPublicCreationResponseDto[]> {
     const { limit = this.paginationLimit, offset = 0 } = paginationDto;
 
     const query = this.creationsRepository
@@ -118,7 +133,7 @@ export class CreationsService {
     return creations;
   }
 
-  async update(id: string, updateCreationDto: UpdateCreationDto) {
+  async update(id: string, updateCreationDto: UpdateCreationDto): Promise<CreationWithoutUserDto> {
     const creation = await this.creationsRepository.preload({
       creation_id: id,
       is_draft: updateCreationDto.isDraft,
@@ -148,7 +163,10 @@ export class CreationsService {
     }
   }
   /* Todas las creaciones públicas de un autor */
-  async findAllByAuthorNickname(nickname: string, paginationDto: PaginationDto) {
+  async findAllByAuthorNickname(
+    nickname: string,
+    paginationDto: PaginationDto,
+  ): Promise<GetPublicCreationResponseDto[]> {
     const { limit = this.paginationLimit, offset = 0 } = paginationDto;
     const user = await this.userRepository.findOneBy({ nickname }); // en base al nickname cojo el ID del usuario pa después buscar las creations
 
