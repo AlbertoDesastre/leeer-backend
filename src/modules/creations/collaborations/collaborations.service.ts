@@ -137,31 +137,61 @@ export class CollaborationsService {
     user: User | Omit<User, 'password'>, // TODO: ¿Hay una mejor manera de tipar esto? Se cambió el DTO de Response de algunos GetCreations. Esos DTOS incluyen la entidad usuario sin el atributo "password"
     creat: Creation | CreationWithoutUserDto,
     paginationDto: PaginationDto,
-  ): Promise<CreationCollaboration[]> {
+  ): Promise<GetCreationCollaborationResponseDto[]> {
     const { limit = this.paginationLimit, offset = 0 } = paginationDto;
     const { creation_id } = creat;
     const { user_id } = user;
-    let collaborations: CreationCollaboration[] = [];
 
     const creation = await this.creationService.findOne(creation_id); // Recuerdo que este método ya devuelve un NotFound si no lo encuentra.
     const isAuthor = creation.user.user_id === user_id;
 
     // El usuario que manda la petición es el autor original y por lo tanto puede ver todas las peticiones de su obra. Si es el peticionador, solo podrá ver las suyas
-    const condition = isAuthor ? { creation: { creation_id } } : { creation: { creation_id }, user: { user_id } };
+    const select = [
+      'collaboration.creation_collaboration_id',
+      'collaboration.approved_by_original_author',
+      'collaboration.is_fanfiction',
+      'collaboration.is_spin_off',
+      'collaboration.is_canon',
+      'collaboration.creation_date',
+      'collaboration.modification_date',
+      'creac.title',
+      'creac.creation_id',
+      'creac.synopsis',
+      'creac.thumbnail',
+      'collaborator.nickname',
+      'collaborator.profile_picture',
+    ];
 
-    collaborations = await this.creationCollaborationRepository.find({
-      take: limit,
-      skip: offset,
-      where: condition,
-    });
+    const query = this.creationCollaborationRepository
+      .createQueryBuilder('collaboration')
+      .leftJoin('collaboration.user', 'collaborator')
+      .leftJoin('collaboration.creation', 'creac')
+      .leftJoin('creac.user', 'author')
+      .select(select)
+      .skip(offset)
+      .limit(limit);
 
-    if (collaborations.length === 0) {
+    // El usuario que manda la petición es el autor original y por lo tanto puede ver todas las peticiones de su obra. Si es el peticionador, solo podrá ver las suyas
+    if (isAuthor) {
+      query.where('creac.creation_id = :creation_id', { creation_id });
+    } else {
+      query.where('creac.creation_id = :creation_id AND collaboration.user = :user_id', {
+        creation_id,
+        user_id,
+      });
+    }
+
+    const rows = await query.getRawMany();
+
+    if (!rows || rows.length === 0) {
       throw new NotFoundException(
         isAuthor
           ? 'No tienes ninguna petición de colaboración para esta obra.'
           : 'No has mandado ninguna solicitud de colaboración a esta creación.',
       );
     }
+
+    const collaborations = this.mapCollaborations(rows);
 
     return collaborations;
   }

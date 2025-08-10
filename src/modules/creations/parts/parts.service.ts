@@ -126,11 +126,11 @@ export class PartsService {
     if (!creation) throw new NotFoundException('No hay ninguna creation con este ID.');
 
     // Obtener todas las colaboraciones aprobadas
-    const collaborations = await this.collaborationService.findAllCollaborationPetitionsByCreation(
+    const collaborations = (await this.collaborationService.findAllCollaborationPetitionsByCreation(
       creation.user,
       creation,
       { limit, offset },
-    );
+    )) as any; // TODO: Corregir esto
 
     /* Lo mismo, si quiero mostrar los Drafts es porque se que el usuario es el creador */
     const condition = showDrafts ? { creation: { creation_id } } : { creation: { creation_id }, is_draft: false };
