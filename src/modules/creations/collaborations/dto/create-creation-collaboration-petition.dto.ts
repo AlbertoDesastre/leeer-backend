@@ -4,7 +4,6 @@ import { Transform } from 'class-transformer';
 import { IsBoolean, IsOptional } from 'class-validator';
 
 export class CreateCollaborationPetitionDto {
-  // Revisar si una manera mejor de indicar opcionales con swagger
   @ApiPropertyOptional({
     description:
       'Aprobado por el autor original. Al mandar una solicitud de colaboración siempre tiene el valor "null", indicando que está pendiente de aprobación.',

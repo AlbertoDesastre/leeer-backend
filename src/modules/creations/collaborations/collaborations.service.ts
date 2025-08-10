@@ -20,6 +20,7 @@ import { CreateCollaborationPetitionDto } from './dto/create-creation-collaborat
 import { UpdateCreationCollaborationDto } from './dto/update-creation-collaboration-petition.dto';
 import { CreationsService } from '../creations.service';
 import { CreationWithoutUserDto } from '../dto/creation-without-user.dto';
+import { GetCreationCollaborationResponseDto } from './dto/get-creation-collaboration-response.dto';
 
 @Injectable()
 export class CollaborationsService {
@@ -38,10 +39,7 @@ export class CollaborationsService {
 
   // Colaboraciones
 
-  async getCollaborationPetition(
-    user: User,
-    creation_collaboration_id: string,
-  ): Promise<CreationCollaboration> {
+  async getCollaborationPetition(user: User, creation_collaboration_id: string): Promise<CreationCollaboration> {
     const { user_id } = user;
 
     const collaboration = await this.creationCollaborationRepository.findOne({
@@ -57,9 +55,7 @@ export class CollaborationsService {
 
     // Si el usuario es colaborador o es el autor original tiene permiso para ver la petición
     if (collaboration.user.user_id != user_id && collaboration.creation.user.user_id != user_id) {
-      throw new ForbiddenException(
-        'No puedes ver esta petición porque no es tuya o no eres el autor original.',
-      );
+      throw new ForbiddenException('No puedes ver esta petición porque no es tuya o no eres el autor original.');
     }
 
     return collaboration;
@@ -93,37 +89,48 @@ export class CollaborationsService {
   async findAllMyCollaborations(
     user: User,
     paginationDto: PaginationDto,
-  ): Promise<{ received: CreationCollaboration[]; sent: CreationCollaboration[] }> {
+  ): Promise<GetCreationCollaborationResponseDto[]> {
     const { limit = this.paginationLimit, offset = 0 } = paginationDto;
     const { user_id } = user;
-    let collaborations: CreationCollaboration[] = [];
+    let collaborations: GetCreationCollaborationResponseDto[] = [];
 
-    const query = this.creationCollaborationRepository
-      .createQueryBuilder('creationCollab')
-      .leftJoinAndSelect('creationCollab.user', 'collabUser')
-      .leftJoinAndSelect('creationCollab.creation', 'creac')
-      .leftJoinAndSelect('creac.user', 'authorUser')
-      .where('creationCollab.user.user_id = :user_id OR creac.user.user_id = :user_id', {
+    const rows = await this.creationCollaborationRepository
+      .createQueryBuilder('collaboration')
+      .leftJoin('collaboration.user', 'collaborator')
+      .leftJoin('collaboration.creation', 'creac')
+      .leftJoin('creac.user', 'author')
+      .where('collaborator.user_id = :user_id OR author.user_id = :user_id', {
         user_id,
       })
+      .select([
+        // la colaboración
+        'collaboration.creation_collaboration_id',
+        'collaboration.approved_by_original_author',
+        'collaboration.is_fanfiction',
+        'collaboration.is_spin_off',
+        'collaboration.is_canon',
+        'collaboration.creation_date',
+        'collaboration.modification_date',
+        // creación solicitada
+        'creac.title',
+        'creac.creation_id',
+        'creac.title',
+        'creac.synopsis',
+        'creac.thumbnail',
+        // datos del colaborador/posible colaborador
+        'collaborator.nickname',
+        'collaborator.profile_picture',
+      ])
       .skip(offset)
       .limit(limit)
-      .getMany();
+      .getRawMany();
 
-    collaborations = await query;
+    collaborations = this.mapCollaborations(rows);
 
     if (!collaborations)
       throw new NotFoundException('No has mandado ni recibido ninguna solicitud de colaboración.');
 
-    let received: CreationCollaboration[] = [];
-    let sent: CreationCollaboration[] = [];
-
-    collaborations.forEach((collaboration) => {
-      if (collaboration.user.user_id === user_id) sent.push(collaboration); // acumula todas las colaboraciones que este usuario mandó a otros autores.
-      if (collaboration.creation.user.user_id === user_id) received.push(collaboration); // aquí el autor que manda esta request observa las peticiones recibidas por otros usuarios
-    });
-
-    return { received, sent };
+    return collaborations;
   }
 
   async findAllCollaborationPetitionsByCreation(
@@ -140,9 +147,7 @@ export class CollaborationsService {
     const isAuthor = creation.user.user_id === user_id;
 
     // El usuario que manda la petición es el autor original y por lo tanto puede ver todas las peticiones de su obra. Si es el peticionador, solo podrá ver las suyas
-    const condition = isAuthor
-      ? { creation: { creation_id } }
-      : { creation: { creation_id }, user: { user_id } };
+    const condition = isAuthor ? { creation: { creation_id } } : { creation: { creation_id }, user: { user_id } };
 
     collaborations = await this.creationCollaborationRepository.find({
       take: limit,
@@ -197,6 +202,32 @@ export class CollaborationsService {
     } catch (error) {
       this.handleException(error);
     }
+  }
+
+  mapCollaborations(rows): GetCreationCollaborationResponseDto[] {
+    let collaborations: GetCreationCollaborationResponseDto[];
+
+    collaborations = rows.map((r) => ({
+      creation_collaboration_id: r.creationCollab_creation_collaboration_id,
+      approved_by_original_author: !!r.creationCollab_approved_by_original_author,
+      is_fanfiction: !!r.creationCollab_is_fanfiction,
+      is_spin_off: !!r.creationCollab_is_spin_off,
+      is_canon: !!r.creationCollab_is_canon,
+      creation_date: r.creationCollab_creation_date,
+      modification_date: r.creationCollab_modification_date,
+      creation: {
+        creation_id: r.creac_creation_id,
+        title: r.creac_title,
+        synopsis: r.creac_synopsis,
+        thumbnail: r.creac_thumbnail,
+      },
+      collaborator: {
+        nickname: r.collaborator_nickname,
+        profile_picture: r.collaborator_profile_picture,
+      },
+    }));
+
+    return collaborations;
   }
 
   handleException(error) {
