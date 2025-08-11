@@ -44,7 +44,7 @@ export class CollaborationsController {
   )
   @ApiOperation({ summary: 'Obtener todas las peticiones de colaboración para una creación' })
   @ApiParam({ name: 'creation_id', type: String, description: 'ID de la creación' })
-  @ApiResponse({ status: 200, description: 'Lista de peticiones de colaboración', isArray: true })
+  @ApiResponse({ status: 200, type: GetCreationCollaborationResponseDto, isArray: true })
   @ApiResponse({ status: 404, description: 'No se encontraron peticiones de colaboración' })
   findAllCollaborationPetitionsByCreation(
     @GetUser() user: User,
@@ -54,11 +54,12 @@ export class CollaborationsController {
     return this.collaborationsService.findAllCollaborationPetitionsByCreation(user, creat, paginationDto);
   }
 
+  // TODO: Revisar y formatear en el servicio el tipo que devuelve
   @Post()
   @AuthenticateByAuthorOwnership()
   @ApiOperation({ summary: 'Enviar una petición de colaboración' })
   @ApiBody({ type: CreateCollaborationPetitionDto })
-  @ApiResponse({ status: 201, description: 'Petición de colaboración enviada correctamente' })
+  @ApiResponse({ status: 201, type: GetCreationCollaborationResponseDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   sendCollaborationPetition(
     @GetUser() user: User,
@@ -67,13 +68,13 @@ export class CollaborationsController {
   ) {
     return this.collaborationsService.sendCollaborationPetition(user, creat, createCollaborationPetitionDto);
   }
-
+  // TODO: Revisar y formatear en el servicio el tipo que devuelve
   @Patch(':id')
   @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR)
   @ApiOperation({ summary: 'Actualizar una petición de colaboración' })
   @ApiParam({ name: 'id', type: String, description: 'ID de la petición de colaboración' })
   @ApiBody({ type: UpdateCreationCollaborationDto })
-  @ApiResponse({ status: 200, description: 'Petición de colaboración actualizada correctamente' })
+  @ApiResponse({ status: 200, type: GetCreationCollaborationResponseDto })
   @ApiResponse({ status: 404, description: 'Petición de colaboración no encontrada' })
   updateCollaborationPetition(
     @Param('id', ParseUUIDPipe) creation_collaboration_id: string,
@@ -85,7 +86,8 @@ export class CollaborationsController {
     );
   }
 
-  // Este método obtiene todas las peticiones a una obra concreta
+  // TODO: Revisar y formatear en el servicio el tipo que devuelve
+  // Este método obtiene una colaboración específica por ID
   @Get(':id') // Este método al final SIEMPRE porque es una ruta dinámica
   @AuthenticateByAuthorOwnership(
     VALID_ROLES.ORIGINAL_AUTHOR,
@@ -94,7 +96,7 @@ export class CollaborationsController {
   )
   @ApiOperation({ summary: 'Obtener una petición de colaboración por ID' })
   @ApiParam({ name: 'id', type: String, description: 'ID de la petición de colaboración' })
-  @ApiResponse({ status: 200, description: 'Detalles de la petición de colaboración' })
+  @ApiResponse({ status: 200, type: GetCreationCollaborationResponseDto })
   @ApiResponse({ status: 404, description: 'Petición de colaboración no encontrada' })
   getCollaborationPetition(
     // Solo necesitamos el collaboration_petition_id, el creation_id se obtiene internamente mediante el Guard
