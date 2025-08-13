@@ -14,6 +14,7 @@ import { CollaborationsService } from './collaborations.service';
 import { GetCreation } from '../decorators/get-creation.decorator';
 import { Creation } from '../entities/creation.entity';
 import { GetCreationCollaborationResponseDto } from './dto/get-creation-collaboration-response.dto';
+import { GetBasicCollaborationDto } from './dto/get-basic-collaboration-response.dto';
 
 @ApiTags('Collaborations')
 @Controller('creations/:creation_id/collaborations')
@@ -54,7 +55,6 @@ export class CollaborationsController {
     return this.collaborationsService.findAllCollaborationPetitionsByCreation(user, creat, paginationDto);
   }
 
-  // TODO: Revisar y formatear en el servicio el tipo que devuelve
   @Post()
   @AuthenticateByAuthorOwnership()
   @ApiOperation({ summary: 'Enviar una petición de colaboración' })
@@ -68,13 +68,13 @@ export class CollaborationsController {
   ) {
     return this.collaborationsService.sendCollaborationPetition(user, creat, createCollaborationPetitionDto);
   }
-  // TODO: Revisar y formatear en el servicio el tipo que devuelve
+
   @Patch(':id')
   @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR)
   @ApiOperation({ summary: 'Actualizar una petición de colaboración' })
   @ApiParam({ name: 'id', type: String, description: 'ID de la petición de colaboración' })
   @ApiBody({ type: UpdateCreationCollaborationDto })
-  @ApiResponse({ status: 200, type: GetCreationCollaborationResponseDto })
+  @ApiResponse({ status: 200, type: GetBasicCollaborationDto })
   @ApiResponse({ status: 404, description: 'Petición de colaboración no encontrada' })
   updateCollaborationPetition(
     @Param('id', ParseUUIDPipe) creation_collaboration_id: string,
