@@ -4,6 +4,11 @@ import { IsString, IsUUID } from 'class-validator';
 
 class LowDetailCollaborator {
   @ApiProperty({
+    example: '3625966b-1ef3-4650-bc3c-07616d83f5f1',
+    description: 'ID único del usuario.',
+  })
+  user_id: string;
+  @ApiProperty({
     example: 'TerryP',
     description: 'Nickname del usuario.',
   })
@@ -37,6 +42,12 @@ class LowDetailCreation {
   })
   @IsString()
   thumbnail: string;
+  @ApiProperty({
+    example: '25b997e4-c1fb-46a9-adbc-006d6261a482',
+    description: 'ID único del autor original de la obra a la que se le está solicitando una colaboración',
+  })
+  @IsUUID()
+  author_id: string;
 }
 
 export class GetCreationCollaborationResponseDto {

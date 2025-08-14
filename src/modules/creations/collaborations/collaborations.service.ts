@@ -21,6 +21,7 @@ import { UpdateCreationCollaborationDto } from './dto/update-creation-collaborat
 import { CreationsService } from '../creations.service';
 import { CreationWithoutUserDto } from '../dto/creation-without-user.dto';
 import { GetCreationCollaborationResponseDto } from './dto/get-creation-collaboration-response.dto';
+import { GetBasicCollaborationDto } from './dto/get-basic-collaboration-response.dto';
 
 @Injectable()
 export class CollaborationsService {
@@ -38,15 +39,49 @@ export class CollaborationsService {
   }
 
   // Colaboraciones
-
-  async getCollaborationPetition(user: User, creation_collaboration_id: string): Promise<CreationCollaboration> {
+  async getCollaborationPetition(
+    user: User,
+    creation_collaboration_id: string,
+  ): Promise<GetCreationCollaborationResponseDto> {
     const { user_id } = user;
 
+    /*     
+Esto estuvo bien para empezar pero se necesitan unos campos concretos para este tipo de respuestas. Lo dejo a modo de consulta.
     const collaboration = await this.creationCollaborationRepository.findOne({
       where: {
         creation_collaboration_id,
       },
     });
+ */
+    // El usuario que manda la petición es el autor original y por lo tanto puede ver todas las peticiones de su obra. Si es el peticionador, solo podrá ver las suyas
+    const select = [
+      'collaboration.creation_collaboration_id',
+      'collaboration.approved_by_original_author',
+      'collaboration.is_fanfiction',
+      'collaboration.is_spin_off',
+      'collaboration.is_canon',
+      'collaboration.creation_date',
+      'collaboration.modification_date',
+      'creac.title',
+      'creac.creation_id',
+      'creac.synopsis',
+      'creac.thumbnail',
+      'creac.user_id',
+      'collaborator.user_id',
+      'collaborator.nickname',
+      'collaborator.profile_picture',
+    ];
+
+    const row = await this.creationCollaborationRepository
+      .createQueryBuilder('collaboration')
+      .leftJoin('collaboration.user', 'collaborator')
+      .leftJoin('collaboration.creation', 'creac')
+      .leftJoin('creac.user', 'author')
+      .select(select)
+      .where('collaboration.creation_collaboration_id = :creation_collaboration_id', { creation_collaboration_id })
+      .getRawOne();
+
+    const collaboration = this.mapSingleCollaboration(row);
 
     if (!collaboration)
       throw new NotFoundException(
@@ -54,7 +89,7 @@ export class CollaborationsService {
       );
 
     // Si el usuario es colaborador o es el autor original tiene permiso para ver la petición
-    if (collaboration.user.user_id != user_id && collaboration.creation.user.user_id != user_id) {
+    if (collaboration.collaborator.user_id != user_id && collaboration.creation.author_id != user_id) {
       throw new ForbiddenException('No puedes ver esta petición porque no es tuya o no eres el autor original.');
     }
 
@@ -69,16 +104,16 @@ export class CollaborationsService {
     const { creation_id } = creat;
     const creation = await this.creationService.findOne(creation_id);
 
-    const creationCollab = this.creationCollaborationRepository.create({
+    const collaboration = this.creationCollaborationRepository.create({
       user,
       creation,
       ...createCollaborationPetitionDto,
     });
 
     try {
-      await this.creationCollaborationRepository.save(creationCollab);
+      await this.creationCollaborationRepository.save(collaboration);
 
-      return { creationCollab };
+      return this.mapSingleCollaboration(collaboration);
     } catch (error) {
       console.log(error);
       this.handleException(error);
@@ -199,7 +234,7 @@ export class CollaborationsService {
   async updateCollaborationPetition(
     creation_collaboration_id: string,
     updateCreationCollaborationDto: UpdateCreationCollaborationDto,
-  ) {
+  ): Promise<GetBasicCollaborationDto> {
     let collaboration = await this.creationCollaborationRepository.preload({
       creation_collaboration_id,
       ...updateCreationCollaborationDto,
@@ -213,6 +248,7 @@ export class CollaborationsService {
 
     try {
       await this.creationCollaborationRepository.save(collaboration);
+      // no hace falta mapear porque esto es solo datos de la collaboration
       return collaboration;
     } catch (error) {
       this.handleException(error);
@@ -234,28 +270,65 @@ export class CollaborationsService {
     }
   }
 
-  mapCollaborations(rows): GetCreationCollaborationResponseDto[] {
-    let collaborations: GetCreationCollaborationResponseDto[];
+  mapSingleCollaboration(row): GetCreationCollaborationResponseDto {
+    if (!row) throw new Error('No se puede mapear una fila nula o undefined');
 
-    collaborations = rows.map((r) => ({
-      creation_collaboration_id: r.creationCollab_creation_collaboration_id,
-      approved_by_original_author: !!r.creationCollab_approved_by_original_author,
-      is_fanfiction: !!r.creationCollab_is_fanfiction,
-      is_spin_off: !!r.creationCollab_is_spin_off,
-      is_canon: !!r.creationCollab_is_canon,
-      creation_date: r.creationCollab_creation_date,
-      modification_date: r.creationCollab_modification_date,
-      creation: {
-        creation_id: r.creac_creation_id,
-        title: r.creac_title,
-        synopsis: r.creac_synopsis,
-        thumbnail: r.creac_thumbnail,
-      },
-      collaborator: {
-        nickname: r.collaborator_nickname,
-        profile_picture: r.collaborator_profile_picture,
-      },
-    }));
+    let collaboration: GetCreationCollaborationResponseDto;
+
+    // Esto está así definido para que pueda mapear tanto instancias de CreationCollaboration como rows crudas de BBDD. La responsabilidad de mapear los datos recae totalmente en este método.
+    if (row instanceof CreationCollaboration) {
+      collaboration = {
+        creation_collaboration_id: row.creation_collaboration_id,
+        approved_by_original_author: !!row.approved_by_original_author,
+        is_fanfiction: !!row.is_fanfiction,
+        is_spin_off: !!row.is_spin_off,
+        is_canon: !!row.is_canon,
+        creation_date: row.creation_date,
+        modification_date: row.modification_date,
+        creation: {
+          author_id: row.creation.user.user_id,
+          creation_id: row.creation.creation_id,
+          title: row.creation.title,
+          synopsis: row.creation.synopsis,
+          thumbnail: row.creation.thumbnail,
+        },
+        collaborator: {
+          user_id: row.user.user_id,
+          nickname: row.user.nickname,
+          profile_picture: row.user.profile_picture,
+        },
+      };
+    } else {
+      collaboration = {
+        creation_collaboration_id: row.creationCollab_creation_collaboration_id,
+        approved_by_original_author: !!row.creationCollab_approved_by_original_author,
+        is_fanfiction: !!row.creationCollab_is_fanfiction,
+        is_spin_off: !!row.creationCollab_is_spin_off,
+        is_canon: !!row.creationCollab_is_canon,
+        creation_date: row.creationCollab_creation_date,
+        modification_date: row.creationCollab_modification_date,
+        creation: {
+          author_id: row.creac_user_id,
+          creation_id: row.creac_creation_id,
+          title: row.creac_title,
+          synopsis: row.creac_synopsis,
+          thumbnail: row.creac_thumbnail,
+        },
+        collaborator: {
+          user_id: row.collaborator_user_id,
+          nickname: row.collaborator_nickname,
+          profile_picture: row.collaborator_profile_picture,
+        },
+      };
+    }
+
+    return collaboration;
+  }
+
+  mapCollaborations(rows): GetCreationCollaborationResponseDto[] {
+    if (!Array.isArray(rows)) throw new Error('Se esperaba una lista de datos y no se pudo mapear la data.');
+
+    let collaborations: GetCreationCollaborationResponseDto[] = rows.map((r) => this.mapSingleCollaboration(r));
 
     return collaborations;
   }
