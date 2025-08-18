@@ -1,16 +1,28 @@
-import { IsString, IsEmail, IsStrongPassword, IsOptional } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
-import { Creation } from '@/modules/creations/entities/creation.entity';
+import { IsString, IsEmail, IsStrongPassword } from 'class-validator';
 
 export class RegisterAuthDto {
+  @ApiProperty({ example: 'autor123', description: 'Nickname único del usuario', uniqueItems: true })
   @IsString()
   readonly nickname: string;
+
+  @ApiProperty({ example: 'autor@email.com', description: 'Email del usuario', uniqueItems: true })
   @IsEmail()
   readonly email: string;
+
+  @ApiProperty({ example: 'https://example.com/thumbnails/viaje.jpg', description: 'URL de la foto de perfil' })
   @IsString()
   readonly profile_picture: string;
+
+  @ApiProperty({ example: 'Escritor de novelas...', description: 'Descripción del usuario' })
   @IsString()
   readonly description: string;
+
+  @ApiProperty({
+    example: 'ContraseñaSegura123!',
+    description: 'Contraseña (mínimo 10 caracteres, una mayúscula, un número y un símbolo)',
+  })
   @IsStrongPassword(
     { minLength: 10, minUppercase: 1, minNumbers: 1, minSymbols: 1 },
     {
@@ -20,7 +32,4 @@ export class RegisterAuthDto {
   )
   @IsString()
   readonly password: string;
-
-  @IsOptional()
-  creations?: Creation[];
 }
