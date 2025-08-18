@@ -5,8 +5,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 
 import { JWTStrategy } from './strategies/jwt.strategy';
-import { AuthService } from '@/modules/auth/services/auth.service';
-import { AuthController } from './controllers/auth.controller';
+import { AuthService } from '@/modules/auth/auth.service';
+import { AuthController } from './auth.controller';
 import { User } from '../users/entities/user.entity';
 import { Creation } from '../creations/entities/creation.entity';
 import { CreationCollaboration } from '../creations/collaborations/entities/creation-collaboration.entity';
@@ -23,8 +23,7 @@ import { CreationCollaboration } from '../creations/collaborations/entities/crea
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        if (!configService.get('secret'))
-          throw new Error("La variable de entorno 'SECRET' no ha sido definida.");
+        if (!configService.get('secret')) throw new Error("La variable de entorno 'SECRET' no ha sido definida.");
 
         return {
           secret: configService.get('secret'),

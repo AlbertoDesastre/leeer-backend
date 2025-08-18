@@ -8,7 +8,7 @@ import { CreationsModule } from '../creations/creations.module';
 import { CreationsService } from '../creations/creations.service';
 import { CreationCollaboration } from '../creations/collaborations/entities/creation-collaboration.entity';
 
-import { AuthService } from '../auth/services/auth.service';
+import { AuthService } from '../auth/auth.service';
 import { AuthModule } from '../auth/auth.module';
 import { PassportModule } from '@nestjs/passport';
 import { CollaborationsService } from '../creations/collaborations/collaborations.service';
