@@ -9,13 +9,14 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 
-import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
-
 import { validate as isUuid } from 'uuid';
+
+import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
 import { Creation } from '@/modules/creations/entities/creation.entity';
+import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { GetUserResponseDto } from './dto/get-user-response.dto';
 
 @Injectable()
 export class UsersService {
@@ -33,7 +34,7 @@ export class UsersService {
     this.paginationLimit = this.configService.get<number>('paginationLimit');
   }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto): Promise<GetUserResponseDto> {
     /* Si trae creations se queda el array que viene, si no, se hace un array vacío */
     const { creations = [], ...userDto } = createUserDto;
 
@@ -50,17 +51,16 @@ export class UsersService {
     }
   }
 
-  findAll(paginationDto: PaginationDto): Promise<User[]> {
+  async findAll(paginationDto: PaginationDto): Promise<GetUserResponseDto[]> {
     const { limit = this.paginationLimit, offset = 0 } = paginationDto;
-    // console.log(limit, offset);
-    const users = this.usersRepository.find({ take: limit, skip: offset }); // take = toma el número de datos solicitado por paginationLimit | skip: se salta el número de resultados solicitados por offset
+    const users = await this.usersRepository.find({ take: limit, skip: offset });
 
-    if (!users) throw new NotFoundException('No se han encontrado usuarios.');
+    if (!users || users.length === 0) throw new NotFoundException('No se han encontrado usuarios.');
 
     return users;
   }
 
-  async findOne(term: string): Promise<User> {
+  async findOne(term: string): Promise<GetUserResponseDto> {
     let user: User;
 
     if (isUuid(term)) {
@@ -82,7 +82,7 @@ export class UsersService {
     return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<GetUserResponseDto> {
     const user = await this.usersRepository.preload({ user_id: id, ...updateUserDto }); // Precarga una entidad de la base de datos en base a su llave primaria. Si no encontró nada entonces la instancia creada estará vacía.
 
     if (!user)
@@ -97,7 +97,7 @@ export class UsersService {
     }
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<string> {
     await this.findOne(id); // si no encuentra el usuario este método ya tira Exception
 
     try {
