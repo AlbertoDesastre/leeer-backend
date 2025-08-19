@@ -86,7 +86,11 @@ export class SeedService {
       };
 
       try {
-        await this.collaborationService.sendCollaborationPetition(collaborator, creation, collaborationPetition);
+        await this.collaborationService.sendCollaborationPetition(
+          collaborator,
+          creation.creation_id,
+          collaborationPetition,
+        );
       } catch (error) {
         console.log(error);
       }

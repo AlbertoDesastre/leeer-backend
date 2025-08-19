@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Query, ParseUUIDPipe, Param } from 
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
 
 import { PaginationDto } from '@/modules/common/dto/pagination-dto.dto';
+import { PaginatedPendingCollaborationsDto } from './dto/paginated-pending-collaborations.dto';
 import { CreateCollaborationPetitionDto } from './dto/create-creation-collaboration-petition.dto';
 import { UpdateCreationCollaborationDto } from './dto/update-creation-collaboration-petition.dto';
 
@@ -15,6 +16,7 @@ import { GetCreation } from '../decorators/get-creation.decorator';
 import { Creation } from '../entities/creation.entity';
 import { GetCreationCollaborationResponseDto } from './dto/get-creation-collaboration-response.dto';
 import { GetBasicCollaborationDto } from './dto/get-basic-collaboration-response.dto';
+import { Authenticate } from '@/modules/auth/decorators/authenticate.decorator';
 
 @ApiTags('Collaborations')
 @Controller('creations/:creation_id/collaborations')
@@ -30,11 +32,28 @@ export class CollaborationsController {
     VALID_ROLES.COLLABORATOR,
     VALID_ROLES.PENDING_COLLABORATOR,
   )
-  @ApiOperation({ summary: 'Obtener todas las colaboraciones del usuario' })
+  @ApiOperation({
+    summary: 'Obtener todas las colaboraciones del usuario. No distingue entre enviadas o recibidas.',
+  })
   @ApiResponse({ status: 200, type: GetCreationCollaborationResponseDto, isArray: true })
   @ApiResponse({ status: 404, description: 'No se encontraron colaboraciones' })
   findAllMyCollaborations(@GetUser() user: User, @Query() paginationDto: PaginationDto) {
     return this.collaborationsService.findAllMyCollaborations(user, paginationDto);
+  }
+
+  @Get('requests/received')
+  @Authenticate()
+  @ApiOperation({
+    summary:
+      'Obtener todas las colaboraciones entrantes para este usuario. Puedes obtener las de cualquier status o solo las pendientes de aprobación.',
+  })
+  @ApiResponse({ status: 200, type: GetCreationCollaborationResponseDto, isArray: true })
+  @ApiResponse({ status: 404, description: 'No se encontraron colaboraciones' })
+  findRequestedCollaborations(
+    @GetUser() user: User,
+    @Query() pendingPaginationDto: PaginatedPendingCollaborationsDto,
+  ) {
+    return this.collaborationsService.findRequestedCollaborations(user, pendingPaginationDto);
   }
 
   @Get('all')
@@ -56,17 +75,17 @@ export class CollaborationsController {
   }
 
   @Post()
-  @AuthenticateByAuthorOwnership()
+  @Authenticate()
   @ApiOperation({ summary: 'Enviar una petición de colaboración' })
   @ApiBody({ type: CreateCollaborationPetitionDto })
   @ApiResponse({ status: 201, type: GetCreationCollaborationResponseDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   sendCollaborationPetition(
     @GetUser() user: User,
-    @GetCreation() creat: Creation,
+    @Param('creation_id') creation_id: string,
     @Body() createCollaborationPetitionDto: CreateCollaborationPetitionDto,
   ) {
-    return this.collaborationsService.sendCollaborationPetition(user, creat, createCollaborationPetitionDto);
+    return this.collaborationsService.sendCollaborationPetition(user, creation_id, createCollaborationPetitionDto);
   }
 
   @Patch(':id')
