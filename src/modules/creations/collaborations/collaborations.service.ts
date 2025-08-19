@@ -22,6 +22,8 @@ import { CreationsService } from '../creations.service';
 import { CreationWithoutUserDto } from '../dto/creation-without-user.dto';
 import { GetCreationCollaborationResponseDto } from './dto/get-creation-collaboration-response.dto';
 import { GetBasicCollaborationDto } from './dto/get-basic-collaboration-response.dto';
+import { PaginatedPendingCollaborationsDto } from './dto/paginated-pending-collaborations.dto';
+import { toNullableBoolean } from '@/modules/common/helpers/toNullableBoolean';
 
 @Injectable()
 export class CollaborationsService {
@@ -98,11 +100,10 @@ Esto estuvo bien para empezar pero se necesitan unos campos concretos para este 
 
   async sendCollaborationPetition(
     user: User,
-    creat: Creation | CreationWithoutUserDto,
+    creation_id: string,
     createCollaborationPetitionDto: CreateCollaborationPetitionDto,
   ) {
-    const { creation_id } = creat;
-    const creation = await this.creationService.findOne(creation_id);
+    const creation = await this.creationService.findOne(creation_id); // Esto ya tira un error si es que no lo encuentra.
 
     const collaboration = this.creationCollaborationRepository.create({
       user,
@@ -153,6 +154,61 @@ Esto estuvo bien para empezar pero se necesitan unos campos concretos para este 
         'creac.synopsis',
         'creac.thumbnail',
         // datos del colaborador/posible colaborador
+        'collaborator.nickname',
+        'collaborator.profile_picture',
+      ])
+      .skip(offset)
+      .limit(limit)
+      .getRawMany();
+
+    collaborations = this.mapCollaborations(rows);
+
+    if (!collaborations)
+      throw new NotFoundException('No has mandado ni recibido ninguna solicitud de colaboración.');
+
+    return collaborations;
+  }
+
+  // TODO: método para obtener todas las peticiones enviadas por mí
+
+  // método para obtener todas las peticiones pendientes
+  async findRequestedCollaborations(
+    user: User,
+    paginationDto: PaginatedPendingCollaborationsDto,
+  ): Promise<GetCreationCollaborationResponseDto[]> {
+    const { pending, limit = this.paginationLimit, offset = 0 } = paginationDto;
+    const { user_id } = user;
+    let collaborations: GetCreationCollaborationResponseDto[] = [];
+
+    const clause = pending
+      ? 'author.user_id = :user_id AND collaboration.approved_by_original_author IS NULL'
+      : 'author.user_id = :user_id ';
+
+    const rows = await this.creationCollaborationRepository
+      .createQueryBuilder('collaboration')
+      .leftJoin('collaboration.user', 'collaborator')
+      .leftJoin('collaboration.creation', 'creac')
+      .leftJoin('creac.user', 'author')
+      .where(clause, {
+        user_id,
+      })
+      .select([
+        // la colaboración
+        'collaboration.creation_collaboration_id',
+        'collaboration.approved_by_original_author',
+        'collaboration.is_fanfiction',
+        'collaboration.is_spin_off',
+        'collaboration.is_canon',
+        'collaboration.creation_date',
+        'collaboration.modification_date',
+        // creación solicitada
+        'creac.title',
+        'creac.creation_id',
+        'creac.title',
+        'creac.synopsis',
+        'creac.thumbnail',
+        // datos del colaborador/posible colaborador
+        'collaborator.user_id',
         'collaborator.nickname',
         'collaborator.profile_picture',
       ])
@@ -279,7 +335,8 @@ Esto estuvo bien para empezar pero se necesitan unos campos concretos para este 
     if (row instanceof CreationCollaboration) {
       collaboration = {
         creation_collaboration_id: row.creation_collaboration_id,
-        approved_by_original_author: !!row.approved_by_original_author,
+        approved_by_original_author: toNullableBoolean(row.approved_by_original_author), // Esto lo hago porque si el valor de esa columna viene como "null" la conversión con "!!" lo transforma a un booleano y no me interesa. Las columnas que vengan con null tienen el significado "pendiente de aprobación" que es clave para algunos casos de uso
+
         is_fanfiction: !!row.is_fanfiction,
         is_spin_off: !!row.is_spin_off,
         is_canon: !!row.is_canon,
@@ -300,13 +357,13 @@ Esto estuvo bien para empezar pero se necesitan unos campos concretos para este 
       };
     } else {
       collaboration = {
-        creation_collaboration_id: row.creationCollab_creation_collaboration_id,
-        approved_by_original_author: !!row.creationCollab_approved_by_original_author,
-        is_fanfiction: !!row.creationCollab_is_fanfiction,
-        is_spin_off: !!row.creationCollab_is_spin_off,
-        is_canon: !!row.creationCollab_is_canon,
-        creation_date: row.creationCollab_creation_date,
-        modification_date: row.creationCollab_modification_date,
+        creation_collaboration_id: row.collaboration_creation_collaboration_id,
+        approved_by_original_author: toNullableBoolean(row.collaboration_approved_by_original_author), // lo mismo aquí
+        is_fanfiction: !!row.collaboration_is_fanfiction,
+        is_spin_off: !!row.collaboration_is_spin_off,
+        is_canon: !!row.collaboration_is_canon,
+        creation_date: row.collaboration_creation_date,
+        modification_date: row.collaboration_modification_date,
         creation: {
           author_id: row.creac_user_id,
           creation_id: row.creac_creation_id,
