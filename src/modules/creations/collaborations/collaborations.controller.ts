@@ -42,7 +42,7 @@ export class CollaborationsController {
   }
 
   @Get('requests/received')
-  @Authenticate()
+  @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR)
   @ApiOperation({
     summary:
       'Obtener todas las colaboraciones entrantes para este usuario. Puedes obtener las de cualquier status o solo las pendientes de aprobación.',
