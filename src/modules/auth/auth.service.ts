@@ -3,20 +3,18 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-
-import { LoginAuthDto } from '@/modules/auth/dto/login-auth.dto';
-import { RegisterAuthDto } from '@/modules/auth/dto/register-auth.dto';
 import { Repository } from 'typeorm';
-
-import { User } from '@/modules/users/entities/user.entity';
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
 
 import * as crypt from 'bcrypt';
-import { InjectRepository } from '@nestjs/typeorm';
-import { JwtPayload } from '../interfaces/jwt-payload';
-import { JwtService } from '@nestjs/jwt';
+
+import { User } from '@/modules/users/entities/user.entity';
+import { LoginAuthDto } from '@/modules/auth/dto/login-auth.dto';
+import { RegisterAuthDto } from '@/modules/auth/dto/register-auth.dto';
+import { JwtPayload } from './interfaces/jwt-payload';
 
 @Injectable()
 export class AuthService {
@@ -73,9 +71,7 @@ export class AuthService {
 
     // Otras excepciones
     if (!user)
-      throw new UnauthorizedException(
-        'El email enviado es incorrecto. Verifique que el correo está bien.',
-      );
+      throw new UnauthorizedException('El email enviado es incorrecto. Verifique que el correo está bien.');
     /* Si el usuario sí que existe entonces hay que verificar que la contraseña es igual */
     if (!crypt.compareSync(password, user.password))
       throw new UnauthorizedException('La contraseña no es correcta.');

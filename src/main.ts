@@ -24,6 +24,10 @@ async function bootstrap() {
     .setTitle('leeer RESTful API')
     .setDescription('Documentación de leeer, un proyecto de escritura colaborativa con IA')
     .setVersion('1.0')
+    .addTag('Creations')
+    .addTag('Parts')
+    .addTag('Collaborations')
+    .addTag('Users')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);

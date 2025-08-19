@@ -7,7 +7,7 @@ import { CreateCreationDto } from '@/modules/creations/dto/create-creation.dto';
 import { Creation } from '@/modules/creations/entities/creation.entity';
 import { CreationsService } from '@/modules/creations/creations.service';
 
-import { AuthService } from '@/modules/auth/services/auth.service';
+import { AuthService } from '@/modules/auth/auth.service';
 import { CreateCollaborationPetitionDto } from '@/modules/creations/collaborations/dto/create-creation-collaboration-petition.dto';
 import { CollaborationsService } from '@/modules/creations/collaborations/collaborations.service';
 import { PartsService } from '../creations/parts/parts.service';
@@ -86,11 +86,7 @@ export class SeedService {
       };
 
       try {
-        await this.collaborationService.sendCollaborationPetition(
-          collaborator,
-          creation,
-          collaborationPetition,
-        );
+        await this.collaborationService.sendCollaborationPetition(collaborator, creation, collaborationPetition);
       } catch (error) {
         console.log(error);
       }
@@ -144,9 +140,7 @@ export class SeedService {
       // tengo solo los colaboradores aprobados
       const approvedCollabs = creation.creation_collaborations
         .filter(
-          (collab) =>
-            collab.approved_by_original_author === true &&
-            collab.user.user_id !== creation.user.user_id,
+          (collab) => collab.approved_by_original_author === true && collab.user.user_id !== creation.user.user_id,
         )
         .map((collab) => collab.user);
 
