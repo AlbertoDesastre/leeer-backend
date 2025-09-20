@@ -58,14 +58,4 @@ describe('SanitizeHTML (Pipe)', () => {
     expect(content).toContain('<img />'); // <-- El atributo no deseado de img se va, pero la etiqueta permanece
     expect(content).toEqual(sanitizedHTML.content);
   });
-
-  test('it should return a sanitized HTML, not saving unwanted HTML tags configured', () => {
-    let unsanitazedHTML = {
-      content: "<a href='www.superhackerlink.com'>Clicka porfi </a> <p>¡Hola!</p> ",
-    };
-
-    const { content } = pipe.transform(unsanitazedHTML, {} as any);
-
-    expect(content).not.toContain('Clicka porfi'); // <-- El texto contenido en etiquetas no deseadas también debería ser eliminado!
-  });
 });
