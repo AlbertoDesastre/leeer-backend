@@ -17,6 +17,7 @@ import { AuthenticateByAuthorOwnership } from '@/modules/auth/decorators/authent
 import { Creation } from '../entities/creation.entity';
 import { CreatePartDto } from './dto/create-part.dto';
 import { GetCreation } from '../decorators/get-creation.decorator';
+import { SanitizeHTML } from './pipes/sanitize-html.pipe';
 
 @ApiTags('Parts')
 @Controller('/creations/:creation_id/parts')
@@ -30,7 +31,7 @@ export class PartsController {
   @ApiResponse({ status: 400, description: 'Bad request' })
   // por supuesto que el creador de la obra puede añadir partes, pero también los colaboradores aprobados por él/ella
   @AuthenticateByAuthorOwnership(VALID_ROLES.ORIGINAL_AUTHOR, VALID_ROLES.COLLABORATOR)
-  create(@GetUser() user: User, @GetCreation() creat: Creation, @Body() createPartDto: CreatePartDto) {
+  create(@GetUser() user: User, @GetCreation() creat: Creation, @Body(SanitizeHTML) createPartDto: CreatePartDto) {
     return this.partsService.create(user, creat, createPartDto);
   }
 
