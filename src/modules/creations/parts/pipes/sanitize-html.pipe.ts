@@ -23,7 +23,6 @@ export class SanitizeHTML implements PipeTransform {
         img: ['src', 'srcset', 'alt', 'title', 'width', 'height'],
       },
       enforceHtmlBoundary: true, // esto elimina cualquier información fuera del comienzo y cierre de la etiqueta <html> o </html>
-      disallowedTagsMode: 'completelyDiscard', // elimina TODO el contenido interno después de remover una etiqueta no deseada. Ejemplo: '<textarea>hola <p>adios</p> </textarea>' se quedará:'<p>adios</p>'
     });
 
     return { ...value, content: cleanHTML };
